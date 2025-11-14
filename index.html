@@ -275,32 +275,73 @@ const DB = {
 };
 const genId = () => "id"+Math.random().toString(36).substr(2,9);
 
+
+// ===============================================
+// LÓGICA DE INTERFAZ MEJORADA (Incluye Swipe) 📱
+// ===============================================
 const sidebar = document.getElementById("sidebar");
 const main = document.getElementById("main");
 const header = document.getElementById("app-header");
+const menuToggle = document.getElementById("menu-toggle");
 
+let touchStartX = 0; 
+const SWIPE_THRESHOLD = 50; 
 
-// ===============================================
-// LÓGICA DE INTERFAZ (AJUSTADA)
-// ===============================================
-// El toggle ahora maneja si es móvil (si es pequeño, solo desliza el menú, sin margen)
-document.getElementById("menu-toggle").onclick = () => {
-  sidebar.classList.toggle("open");
-  // Solo aplicar "shifted" si la pantalla es lo suficientemente grande (desktop view)
-  if (window.innerWidth >= 768) {
-     main.classList.toggle("shifted");
+function openSidebar() {
+    sidebar.classList.add("open");
+    // Solo aplicar "shifted" si la pantalla es lo suficientemente grande (desktop view)
+    if (window.innerWidth >= 768) {
+       main.classList.add("shifted");
+    } else {
+       main.classList.remove("shifted"); 
+    }
+}
+
+function closeSidebar() {
+    sidebar.classList.remove("open");
+    main.classList.remove("shifted"); 
+}
+
+// 1. Manejar el click/tap en el botón del menú
+menuToggle.onclick = () => {
+  if (sidebar.classList.contains("open")) {
+    closeSidebar();
   } else {
-     // En móvil, solo queremos que el menú se deslice sin desplazar el contenido principal
-     main.classList.remove("shifted"); 
+    openSidebar();
   }
 };
 
-function closeSidebar() {
-  if (sidebar.classList.contains("open")) {
-    sidebar.classList.remove("open");
-    main.classList.remove("shifted"); // Asegura que se quite el margen si lo tiene
-  }
+// 2. Agregar lógica de SWIPE
+function handleTouchStart(event) {
+    if (event.touches.length === 1) {
+        touchStartX = event.touches[0].clientX;
+    }
 }
+
+function handleTouchEnd(event) {
+    if (event.changedTouches.length !== 1 || touchStartX === 0) return; 
+
+    const touchEndX = event.changedTouches[0].clientX;
+    const deltaX = touchEndX - touchStartX;
+
+    // --- LÓGICA DE APERTURA (Swipe a la derecha) ---
+    // Si se desliza a la DERECHA y el toque inicial fue cerca del borde izquierdo
+    if (deltaX > SWIPE_THRESHOLD && touchStartX < 50 && !sidebar.classList.contains("open")) {
+        openSidebar();
+    }
+    
+    // --- LÓGICA DE CIERRE (Swipe a la izquierda) ---
+    // Si se desliza a la IZQUIERDA y el menú está abierto
+    if (deltaX < -SWIPE_THRESHOLD && sidebar.classList.contains("open")) {
+        closeSidebar();
+    }
+
+    touchStartX = 0;
+}
+
+// 3. Asignar los listeners al cuerpo para detección de borde
+document.body.addEventListener('touchstart', handleTouchStart, false);
+document.body.addEventListener('touchend', handleTouchEnd, false);
 
 // ===============================================
 // VISTA: DASHBOARD
@@ -393,7 +434,6 @@ function renderDashboard(){
     </div>
   `;
   
-  // *** ELIMINADO: closeSidebar() se llama en el botón del menú
   renderLoanDistributionChart();
 }
 
@@ -483,7 +523,6 @@ function renderClients(){
     <div id="clients-list"></div>
   `;
   refreshClientsList();
-  // *** ELIMINADO: closeSidebar() se llama en el botón del menú
 }
 
 function addClient(){
@@ -701,7 +740,6 @@ function renderLoans() {
   `;
   populateClientSelect(); // Llena el selector de clientes
   refreshLoanList();      // Carga la lista de préstamos existentes
-  // *** ELIMINADO: closeSidebar() se llama en el botón del menú
 }
 
 function populateClientSelect() {
@@ -970,7 +1008,6 @@ function renderCobros(loanIdToSelect = null) {
 
     populateLoanSelect(loanIdToSelect);
     refreshPendingPayments();
-    // *** ELIMINADO: closeSidebar() se llama en el botón del menú
 }
 
 function populateLoanSelect(loanIdToSelect) {
@@ -1172,7 +1209,6 @@ function renderCobrosHistory() {
         <div id="cobros-history-list"></div>
     `;
     refreshCobrosHistory();
-    // *** ELIMINADO: closeSidebar() se llama en el botón del menú
 }
 
 function refreshCobrosHistory() {
@@ -1274,7 +1310,6 @@ function deleteCobro(cobroId) {
 // VISTA: REPORTES (SIN BLOQUEO PREMIUM)
 // ===============================================
 function renderReports() {
-    // *** ELIMINADO: closeSidebar() se llama en el botón del menú
     
     const summary = calculateLoanPortfolioSummary();
     const settings = DB.getSettings();
@@ -1430,7 +1465,6 @@ function renderSettings() {
             <button class="action-btn" onclick="saveSettings()">Guardar Configuraciones</button>
         </div>
     `;
-    // *** ELIMINADO: closeSidebar() se llama en el botón del menú
 }
 
 function saveSettings() {
@@ -1479,7 +1513,6 @@ function renderMaintenance() {
             <button class="action-btn" onclick="importData()">Importar Datos (JSON)</button>
         </div>
     `;
-    // *** ELIMINADO: closeSidebar() se llama en el botón del menú
 }
 
 function resetData() {
