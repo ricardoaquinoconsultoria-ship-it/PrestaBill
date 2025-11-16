@@ -12,7 +12,7 @@
 <style>
 /* 1. Resetear el Box Sizing para mejor consistencia */
 *, *::before, *::after {
-  box-sizing: border-box; /* Corregido a border-box */
+  box-sizing: border-box; 
 }
 
 body { 
@@ -199,6 +199,14 @@ table th {
 }
 /* Las filas impares tienen un color suave */
 
+/* MEJORA 10: Cursor Pointer para Feedback UX */
+table tr:not(.neutral-header) {
+    cursor: pointer;
+}
+table tr:not(.neutral-header):hover {
+    background: #e9eff5 !important;
+}
+
 
 /* Estilo específico para la columna con el texto más propenso a desbordarse */
 .client-loan-cell {
@@ -235,7 +243,7 @@ table th {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-/* MODAL DE VISUALIZACIÓN DE FACTURA (MEJORA 14) */
+/* MEJORA 14: MODAL DE VISUALIZACIÓN DE FACTURA */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -247,16 +255,19 @@ table th {
     justify-content: center;
     align-items: center;
     z-index: 2000;
+    backdrop-filter: blur(5px); /* Fondo desenfocado para destacar el modal */
 }
 .modal-content {
     background: white;
-    padding: 10px;
+    padding: 20px; /* Más padding */
     border-radius: 8px;
-    max-width: 90%;
+    max-width: 800px; /* Ancho máximo para el PDF */
+    width: 90%;
     max-height: 90%;
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 .modal-header {
     display: flex;
@@ -275,17 +286,23 @@ table th {
     color: white;
     border: none;
     border-radius: 5px;
-    padding: 5px 10px;
+    padding: 8px 15px; /* Más padding */
     cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+.modal-close-btn:hover {
+    background: #c0392b;
 }
 #invoice-iframe {
     width: 100%;
     flex-grow: 1;
     min-height: 500px; /* Altura mínima para asegurar visibilidad */
-    border: none;
+    border: 1px solid #ddd;
+    border-radius: 4px;
 }
 .modal-download-btn {
-    margin-top: 10px;
+    margin-top: 15px; /* Más margen */
     background: #2ecc71;
 }
 
@@ -306,6 +323,7 @@ table th {
   <span id="menu-toggle" 
         role="button" 
         aria-controls="sidebar" 
+        /* MEJORA 11: Accesibilidad - ARIA */
         aria-expanded="false" 
         tabindex="0">☰</span>
   Presta Bill
@@ -1109,7 +1127,7 @@ function renderCobros(loanIdToSelect = null) {
         </div>
 
         <div class="card" style="margin-top: 20px; background: #ffe0f0; border: 1px solid #f0cccc;">
-             <h3>Generar Factura Manual (MEJORA 14)</h3>
+             <h3>Generar Factura Manual</h3>
              <p>Seleccione un cobro del historial para generar o ver la factura retroactivamente.</p>
              <label for="invoice-cobro-id" style="display:block; font-weight:bold; margin-bottom:5px;">Seleccionar Cobro:</label>
              <select id="invoice-cobro-id" class="form-input" style="margin-bottom:15px;">
@@ -1155,7 +1173,7 @@ function populateLoanSelect(loanIdToSelect) {
     }
 }
 
-// NUEVA FUNCIÓN PARA POBLAR SELECT DE COBROS EN FACTURA
+// MEJORA 14: NUEVA FUNCIÓN PARA POBLAR SELECT DE COBROS EN FACTURA
 function populateCobroSelectForInvoice() {
     const allCobros = DB.getInitialCobros().sort((a, b) => new Date(b.fullDateTime) - new Date(a.fullDateTime)); // El más reciente primero
     const select = document.getElementById("invoice-cobro-id");
@@ -1176,10 +1194,9 @@ function generateInvoiceFromSelect(viewOnly) {
     const cobroId = document.getElementById("invoice-cobro-id").value;
     if (!cobroId) return alert("Por favor, seleccione un cobro del historial.");
     
-    // Si viewOnly es true, mostramos en el modal. Si es false, descargamos.
+    // Al llamar sin el segundo parámetro (previousState), la función createInvoiceDocument 
+    // recalculará el estado anterior retroactivamente.
     if (viewOnly) {
-        // Al llamar sin el segundo parámetro (previousState), la función createInvoiceDocument 
-        // recalculará el estado anterior retroactivamente.
         viewInvoicePDF(cobroId); 
     } else {
         generateInvoicePDF(cobroId); 
@@ -1369,6 +1386,7 @@ function createInvoiceDocument(cobroId, previousState = {}) {
         paymentsMade: paymentsMadeBefore 
     });
     
+    // Cuanto de lo pagado cubrió la mora que había
     const moraPagada = Math.min(amountPaid, oldRisk.totalDue);
     
     // Abono que queda después de pagar la mora
@@ -1376,31 +1394,19 @@ function createInvoiceDocument(cobroId, previousState = {}) {
     
     // Lógica para determinar el abono extra (adelanto)
     let abonoProximaCuota = 0;
-    
-    if (oldRisk.monthsBehind > 0) {
-        // Si había mora, y el pago es mayor a la mora + cuota, el resto es adelanto.
-        // Pero dado que los pagos se calculan contra lo adeudado, simplificamos:
-        // Si ya se cubrió la mora, lo que resta de abonoPrincipalInteres puede ir a la siguiente cuota.
-        // Lo que se asigna a la cuota regular (si no estaba en mora o si se cubrió)
-        const pagoACuotaNormal = Math.min(cuotaMensual, abonoPrincipalInteres);
+    let abonoNormal = 0; // Monto que fue a cubrir la parte "normal" de la deuda (la cuota actual)
+
+    if (abonoPrincipalInteres > 0) {
+        // El abono normal es la porción que va a cubrir la cuota mensual
+        abonoNormal = Math.min(cuotaMensual, abonoPrincipalInteres);
         
-        // El adelanto es el excedente después de cubrir la cuota y la mora.
-        abonoProximaCuota = Math.max(0, abonoPrincipalInteres - pagoACuotaNormal);
-        
-    } else {
-        // Si no había mora, el abono es el total pagado.
-        abonoPrincipalInteres = amountPaid;
-        
-        // Adelanto es cualquier cosa por encima de la cuota mensual.
-        abonoProximaCuota = Math.max(0, amountPaid - cuotaMensual);
+        // El adelanto es el excedente después de cubrir la mora y la cuota normal
+        abonoProximaCuota = Math.max(0, abonoPrincipalInteres - abonoNormal);
     }
     
     // Aseguramos que el pago a la próxima cuota no sea negativo (aunque el cálculo anterior lo evita)
     abonoProximaCuota = Math.max(0, abonoProximaCuota);
     
-    // Monto que realmente fue a cubrir la parte "normal" de la deuda (no mora, no adelanto)
-    const abonoNormal = amountPaid - moraPagada - abonoProximaCuota;
-
     // Datos Finales
     const remainingBalanceAfter = totalPagar - (totalPaidBefore + amountPaid);
     // Para la factura, usar el cálculo simple de pagos/cuotas
@@ -1453,7 +1459,7 @@ function createInvoiceDocument(cobroId, previousState = {}) {
     let desgloseData = [
          // Si había mora, mostrarla
         ...(moraPagada > 0 ? [["Mora Atrasada Cubierta:", formatCurrency(moraPagada)]] : []),
-        ["Abono a Cuota Normal/Principal:", formatCurrency(abonoNormal)],
+        ["Abono a Cuota Normal:", formatCurrency(abonoNormal)],
         ...(abonoProximaCuota > 0 ? [["Aporte Extra/Adelanto Cuota:", formatCurrency(abonoProximaCuota)]] : []),
         ["--------------------------------", "--------------------------------"],
         ["MONTO TOTAL DE ESTE COBRO:", formatCurrency(amountPaid)],
@@ -1579,7 +1585,8 @@ function closeInvoiceModal() {
 // Función que usa el ID global para la descarga
 function downloadInvoice() {
     if (currentCobroId) {
-        generateInvoicePDF(currentCobroId);
+        // Al descargar desde el modal, siempre regeneramos la factura por si la DB ha cambiado
+        generateInvoicePDF(currentCobroId); 
     } else {
         alert("No hay una factura seleccionada para descargar.");
     }
