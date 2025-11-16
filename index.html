@@ -172,16 +172,27 @@ main {
     transform: scale(0.98);
 }
 
-/* Ajustes para tablas */
+/* AJUSTES DE TABLA RESPONSIVA Y CENTRADO VERTICAL (SOLICITADO) */
+
+/* Contenedor que permite scroll horizontal en móviles */
+.table-responsive-container {
+    overflow-x: auto; 
+    width: 100%;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
+    /* Asegurar que la tabla dentro del contenedor no se fuerce a un tamaño menor que su contenido */
+    min-width: 700px; 
 }
 
 table td, table th {
     padding: 12px 10px; /* Más padding */
     border: none; /* Quitamos el borde de celdas para usar solo el de fila */
     text-align: left;
+    /* CAMBIO CLAVE: Centrado Vertical */
+    vertical-align: middle; 
 }
 
 table th {
@@ -214,6 +225,7 @@ table tr:not(.neutral-header):hover {
     white-space: normal; 
     word-break: break-word; 
     overflow-wrap: break-word; 
+    vertical-align: middle; /* Asegurar centrado vertical aquí también */
 }
 
 /* === ESTILOS DE REPORTES/MORA === */
@@ -1779,22 +1791,24 @@ function refreshPendingPayments() {
 
     box.innerHTML = `
         <div class="card">
-            <table>
-                <thead>
-                    <tr class="neutral-header">
-                        <th>Cliente</th>
-                        <th>Cuotas Pagas</th>
-                        <th>Próx. Vencimiento</th>
-                        <th>Saldo Total Restante</th>
-                        <th>Estatus Mora</th>
-                        <th>Monto Adeudado (Hoy)</th>
-                        <th>Acción</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${tableRows}
-                </tbody>
-            </table>
+        <div class="table-responsive-container"> 
+                <table>
+                    <thead>
+                        <tr class="neutral-header">
+                            <th>Cliente</th>
+                            <th>Cuotas Pagas</th>
+                            <th>Próx. Vencimiento</th>
+                            <th>Saldo Total Restante</th>
+                            <th>Estatus Mora</th>
+                            <th>Monto Adeudado (Hoy)</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableRows}
+                    </tbody>
+                </table>
+            </div> 
             <p style="font-size:0.9em; margin-top:15px; color:#666;">*Doble clic en la fila para cargar el préstamo en el formulario de pago.</p>
         </div>
     `;
