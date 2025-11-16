@@ -498,7 +498,7 @@ table tr:not(.neutral-header):hover {
 
 <div id="snackbar"></div>
 
-<script src="https://www.paypal.com/sdk/js?client-id=AXf2lr335i2eqVAM2TU36CzKEMQDost41DOaPqCx_T7PfUqY0OKmZamVmH6jfguv0Q0i7ree0dc82wwE&vault=true&intent=subscription"></script>
+<script src="https://www.paypal.com/sdk/js?client-id=AXf2lr335i2eqVAM2TU36CzKEMQDost41DOaPqCx_T7PfUqY0OKnZamVmH6jfguv0Q0i7ree0dc82wwE&vault=true&intent=subscription"></script>
 
 <script>
 // ===============================================
@@ -2350,6 +2350,11 @@ function renderMaintenance() {
             <button class="action-btn" style="background:#c0392b;" onclick="resetData()">🗑️ Eliminar Todos los Datos</button>
         </div>
         
+        <div class="card" style="background: #fdf5e6; border: 1px solid #f39c12;">
+            <h3 style="color:#f39c12;">Control de Suscripción (Debugging)</h3>
+            <p>Si el botón de PayPal no aparece, haz clic aquí para forzar la inactividad de la suscripción (solo para pruebas/debugging).</p>
+            <button class="action-btn" style="background:#f39c12;" onclick="resetSubscriptionState()">🔄 Resetear Estado de Suscripción</button>
+        </div>
         <div class="card">
             <h3>Exportar Respaldo</h3>
             <p>Guarde un respaldo de todos los datos como un archivo JSON. Puede importarlo más tarde o usarlo como copia de seguridad.</p>
@@ -2452,6 +2457,28 @@ function importData() {
     };
     reader.readAsText(file);
 }
+
+// ===============================================
+// FUNCIÓN AÑADIDA PARA RESETEAR SUSCRIPCIÓN (SOLUCIÓN)
+// ===============================================
+function resetSubscriptionState() {
+    if (!confirm("¿Estás seguro de que quieres forzar la inactividad de la suscripción de PayPal? Esto hará que el botón de pago vuelva a aparecer y reiniciará el Dashboard.")) {
+        return;
+    }
+
+    localStorage.setItem("paypalSubscription", "inactive");
+    
+    // Recargar el botón de PayPal inmediatamente si el modal está abierto, o avisar
+    if (document.getElementById("modal-overlay").style.display === "flex") {
+        cargarBotonPayPal(); // Asegura que el botón se renderice si el modal estaba abierto
+    }
+
+    showToast("Estado de Suscripción reseteado a INACTIVO. Intenta abrir el menú y luego el botón 'Suscripción'.", 'warning');
+    // Forzar recarga de la vista para asegurar que el mensaje de trial expire se vaya.
+    renderDashboard(); 
+}
+// ===============================================
+
 
 // ===============================================
 // INICIALIZACIÓN
