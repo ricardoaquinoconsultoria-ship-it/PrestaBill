@@ -680,7 +680,7 @@ function renderClients(){
         <h3 style="margin-top:0;">Agregar Nuevo Cliente</h3>
         <div style="display:grid; gap:10px;">
             <input id="client-name" placeholder="Nombre (Requerido)" class="form-input">
-            <input type="number" id="client-cedula" placeholder="Cédula (Requerido)" class="form-input">
+            <input type="number" id="client-cedula" placeholder="Cédula/ID (Requerido)" class="form-input">
             <input id="client-address" placeholder="Dirección Residencial" class="form-input">
             <input type="tel" id="client-phone-main" placeholder="Teléfono Principal" class="form-input"> 
             <input type="tel" id="client-phone-mobile" placeholder="Celular" class="form-input">
@@ -705,11 +705,19 @@ function addClient(){
   const phoneMobile = document.getElementById("client-phone-mobile").value.trim();
   
   if(!name || !cedula) {
-    showToast("Nombre y Cédula son requeridos", 'error'); // MEJORA 15
+    showToast("Nombre y Cédula/ID son requeridos", 'error'); // MEJORA 15
     return;
   }
   
   const all = DB.get("clients");
+  
+  // MEJORA 16: Validación de Cédula Duplicada
+  const isDuplicate = all.some(client => client.cedula === cedula);
+  if (isDuplicate) {
+    showToast(`Error: Ya existe un cliente con la Cédula/ID ${cedula}.`, 'error');
+    return;
+  }
+
   all.push({
     id: genId(), 
     name, 
@@ -868,6 +876,14 @@ function saveClient(id) {
     let all = DB.get("clients");
     const index = all.findIndex(c => c.id === id);
     if (index === -1) return;
+    
+    // MEJORA 16: Validación de Cédula Duplicada al Editar
+    const isDuplicate = all.some(c => c.cedula === cedula && c.id !== id);
+    if (isDuplicate) {
+        showToast(`Error: Ya existe otro cliente con la Cédula/ID ${cedula}.`, 'error');
+        return;
+    }
+
 
     all[index] = {
         id: id, 
