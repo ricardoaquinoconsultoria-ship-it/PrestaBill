@@ -1430,6 +1430,12 @@ function registerPayment() {
 
 let currentCobroId = null; // Variable global para saber qué cobro descargar
 
+/**
+ * Crea el documento jsPDF con el contenido de la factura.
+ * @param {string} cobroId - ID del cobro.
+ * @param {object} previousState - Estado del préstamo antes del cobro (opcional).
+ * @returns {object|null} - Objeto con el documento PDF y metadatos o null en caso de error.
+ */
 function createInvoiceDocument(cobroId, previousState = {}) {
     // 1. Obtener Datos
     const cobro = DB.getInitialCobros().find(c => c.id === cobroId);
@@ -1458,16 +1464,19 @@ function createInvoiceDocument(cobroId, previousState = {}) {
     const totalPagar = Number(loan.amount) + Number(loan.totalInterest);
     const cuotaMensual = Number(loan.monthlyPayment);
     
+    // Determinar si el estado anterior fue pasado como parámetro (registro de cobro en vivo)
     const isStateProvided = previousState.oldTotalPaidAmount !== undefined;
 
     let totalPaidBefore = 0;
     let paymentsMadeBefore = 0;
     
     if (!isStateProvided) {
+        // Si no se pasó el estado, calcularlo retroactivamente
         const allCobrosForLoan = DB.getInitialCobros()
             .filter(c => c.loanId === loan.id)
             .sort((a, b) => new Date(a.fullDateTime) - new Date(b.fullDateTime));
         
+        // Sumar todos los cobros que sean ANTERIORES al cobro actual
         for (const c of allCobrosForLoan) {
             if (c.id === cobro.id) break;
             totalPaidBefore += Number(c.amount);
@@ -1475,40 +1484,52 @@ function createInvoiceDocument(cobroId, previousState = {}) {
         paymentsMadeBefore = Math.floor(totalPaidBefore / cuotaMensual);
 
     } else {
+        // Usar el estado pasado si se proporcionó
         totalPaidBefore = previousState.oldTotalPaidAmount;
         paymentsMadeBefore = previousState.oldPaymentsMade;
     }
     
     const remainingBalanceBefore = totalPagar - totalPaidBefore; 
     
+    // Calcular mora ANTES de este cobro
     const oldRisk = calculateLoanRisk({ 
         ...loan, 
         totalPaidAmount: totalPaidBefore, 
         paymentsMade: paymentsMadeBefore 
     });
     
+    // Desglose del pago
     const moraPagada = Math.min(amountPaid, oldRisk.totalDue);
-
     let abonoPrincipalInteres = amountPaid - moraPagada; 
     
-    let abonoProximaCuota = 0;
     let abonoNormal = 0;
+    let abonoProximaCuota = 0;
 
     if (abonoPrincipalInteres > 0) {
+        // Primero, cuánto se necesita para cubrir la próxima cuota completa
         abonoNormal = Math.min(cuotaMensual, abonoPrincipalInteres);
+        // Si queda algo, es aporte extra/adelanto
         abonoProximaCuota = Math.max(0, abonoPrincipalInteres - abonoNormal);
     }
     
-    abonoProximaCuota = Math.max(0, abonoProximaCuota);
-    
+    // Ajustes finales de balances
     const remainingBalanceAfter = totalPagar - (totalPaidBefore + amountPaid);
+    // Nota: las cuotas pagadas se cuentan por la división entre cuotaMensual, que es la forma en que se actualiza el loan
     const paymentsMadeAfter = Math.floor((totalPaidBefore + amountPaid) / cuotaMensual); 
 
 
-    const doc = new jsPDF();
+    // ============================
+    // GENERACIÓN DEL PDF
+    // ============================
+    const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "letter"
+    });
     const pageWidth = doc.internal.pageSize.getWidth();
     let y = 15;
 
+    // Título y encabezado
     doc.setFontSize(18);
     doc.setTextColor(28, 93, 153);
     doc.text("RECIBO DE PAGO", pageWidth / 2, y, { align: "center" });
@@ -1525,6 +1546,7 @@ function createInvoiceDocument(cobroId, previousState = {}) {
     doc.line(10, y, pageWidth - 10, y);
     y += 5;
 
+    // Datos del cliente y préstamo
     doc.setFontSize(12);
     doc.setTextColor(0, 0, 0);
 
@@ -1550,6 +1572,7 @@ function createInvoiceDocument(cobroId, previousState = {}) {
     doc.line(10, y, pageWidth - 10, y);
     y += 5;
 
+    // Desglose del pago
     let desgloseData = [
         ...(moraPagada > 0 ? [["Mora Atrasada Cubierta:", formatCurrency(moraPagada)]] : []),
         ["Abono a Cuota Normal:", formatCurrency(abonoNormal)],
@@ -1570,15 +1593,14 @@ function createInvoiceDocument(cobroId, previousState = {}) {
             1: { halign: 'right', fontStyle: 'bold' } 
         },
         didParseCell: function(data) {
-            // Estilo especial para la fila del monto total
             if (data.row.index === desgloseData.length - 1) {
-                data.cell.styles.fillColor = [220, 240, 220]; // Verde claro
+                data.cell.styles.fillColor = [220, 240, 220]; 
             }
         },
         willDrawCell: function(data) {
             if (data.row.index === desgloseData.length - 1 && data.section === 'body') {
                 doc.setFontSize(12);
-                doc.setTextColor(46, 204, 113); // Color verde para el monto pagado
+                doc.setTextColor(46, 204, 113); 
             } else if (data.section === 'body') {
                  doc.setFontSize(10);
                  doc.setTextColor(0, 0, 0);
@@ -1588,6 +1610,7 @@ function createInvoiceDocument(cobroId, previousState = {}) {
     
     y = doc.autoTable.previous.finalY + 5;
 
+    // Estado del préstamo
     const finalData = [
         ["Saldo Pendiente ANTES de este Pago:", formatCurrency(remainingBalanceBefore)],
         ["SALDO PENDIENTE DESPUÉS del Pago:", formatCurrency(remainingBalanceAfter)],
@@ -1606,7 +1629,6 @@ function createInvoiceDocument(cobroId, previousState = {}) {
             1: { halign: 'right', fontStyle: 'bold' } 
         },
         didParseCell: function(data) {
-            // Estilo especial para la fila del saldo final
             if (data.row.index === 1) {
                 data.cell.styles.fillColor = [200, 220, 240];
             }
@@ -1615,6 +1637,7 @@ function createInvoiceDocument(cobroId, previousState = {}) {
 
     y = doc.autoTable.previous.finalY + 10;
     
+    // Pie de página
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
     doc.text('Este documento es un comprobante de pago. Guarde para sus registros.', 10, y);
@@ -1628,6 +1651,11 @@ function createInvoiceDocument(cobroId, previousState = {}) {
     return { doc, clientName: client.name, cobroDate: cobro.date };
 }
 
+/**
+ * Genera el PDF y fuerza la descarga al disco duro.
+ * @param {string} cobroId - ID del cobro.
+ * @param {object} previousState - Estado del préstamo antes del cobro.
+ */
 function generateInvoicePDF(cobroId, previousState = {}) {
     const result = createInvoiceDocument(cobroId, previousState);
     if (!result) return;
@@ -1635,16 +1663,22 @@ function generateInvoicePDF(cobroId, previousState = {}) {
     const { doc, clientName, cobroDate } = result;
     const fileName = `Factura_Cobro_${clientName.replace(/\s/g, '_')}_${cobroDate.replace(/\//g, '-')}.pdf`;
     
-    // **USANDO doc.save() en lugar de doc.output('bloburi')**
     doc.save(fileName); 
     showToast(`Factura descargada: ${fileName}`, 'info');
 }
 
+/**
+ * Genera el PDF y lo muestra en el iframe del modal.
+ * @param {string} cobroId - ID del cobro.
+ * @param {object} previousState - Estado del préstamo antes del cobro.
+ */
 function viewInvoicePDF(cobroId, previousState = {}) {
     const result = createInvoiceDocument(cobroId, previousState);
     if (!result) return;
     
     const { doc, clientName, cobroDate } = result;
+    
+    // **USANDO BLOBURL PARA VISUALIZAR EN IFRAME**
     const pdfDataUri = doc.output('datauristring');
     
     const iframe = document.getElementById('invoice-iframe');
@@ -1668,6 +1702,8 @@ function closeInvoiceModal() {
 
 function downloadInvoice() {
     if (currentCobroId) {
+        // Al descargar, volvemos a llamar a generateInvoicePDF para asegurar la descarga directa
+        // No pasamos previousState porque generateInvoicePDF lo recalcula si es necesario
         generateInvoicePDF(currentCobroId);
         closeInvoiceModal();
     } else {
