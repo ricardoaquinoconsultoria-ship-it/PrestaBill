@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Presta Bill - Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -87,7 +89,11 @@ aside.open { left:0; }
   background:#34495e; /* Hover más claro */
 } 
 /* MEJORA 4: Estilo para el botón activo (opcional) */
-/* .nav-btn.active { background:#1c5d99; } */
+.nav-btn.active { 
+    background:#1c5d99; /* Color de acento */
+    font-weight: 700;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
 
 /* MAIN */
 main {
@@ -130,7 +136,7 @@ main {
 }
 
 /* CONTENEDOR DE CLIENTES Y PRESTAMOS */
-#clients-list, #loans-list {
+#clients-list, #loans-list-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Min-width un poco más grande */
   gap: 20px; 
@@ -201,7 +207,10 @@ table th {
 
 /* MEJORA 10: Cursor Pointer para Feedback UX */
 table tr:not(.neutral-header) {
-    cursor: pointer;
+    cursor: default; /* Por defecto sin puntero */
+}
+table tr[ondblclick]:not(.neutral-header) {
+    cursor: pointer; /* Solo las filas con doble click */
 }
 table tr:not(.neutral-header):hover {
     background: #e9eff5 !important;
@@ -331,14 +340,14 @@ table tr:not(.neutral-header):hover {
 
 <aside id="sidebar">
     <h3 style="padding:15px; margin:0; text-align:center; color:#fff; border-bottom:1px solid #34495e;">Menú Principal</h3>
-  <button class="nav-btn" type="button" onclick="renderDashboard(); closeSidebar();">🏠 Inicio</button>
-  <button class="nav-btn" type="button" onclick="renderClients(); closeSidebar();">👥 Clientes</button>
-  <button class="nav-btn" type="button" onclick="renderLoans(); closeSidebar();">💵 Préstamos</button>
-  <button class="nav-btn" type="button" onclick="renderCobros(); closeSidebar();">💰 Cobros</button>
-  <button class="nav-btn" type="button" onclick="renderReports(); closeSidebar();">📊 Reportes</button>
-  <button class="nav-btn" type="button" onclick="renderCobrosHistory(); closeSidebar();">📜 Historial Transacciones</button>
-  <button class="nav-btn" type="button" onclick="renderSettings(); closeSidebar();">⚙️ Configuraciones</button>
-  <button class="nav-btn" type="button" onclick="renderMaintenance(); closeSidebar();">💾 Mantenimiento</button> 
+  <button class="nav-btn" data-view="dashboard" type="button" onclick="renderDashboard(); closeSidebar();">🏠 Inicio</button>
+  <button class="nav-btn" data-view="clients" type="button" onclick="renderClients(); closeSidebar();">👥 Clientes</button>
+  <button class="nav-btn" data-view="loans" type="button" onclick="renderLoans(); closeSidebar();">💵 Préstamos</button>
+  <button class="nav-btn" data-view="cobros" type="button" onclick="renderCobros(); closeSidebar();">💰 Cobros</button>
+  <button class="nav-btn" data-view="reports" type="button" onclick="renderReports(); closeSidebar();">📊 Reportes</button>
+  <button class="nav-btn" data-view="history" type="button" onclick="renderCobrosHistory(); closeSidebar();">📜 Historial Transacciones</button>
+  <button class="nav-btn" data-view="settings" type="button" onclick="renderSettings(); closeSidebar();">⚙️ Configuraciones</button>
+  <button class="nav-btn" data-view="maintenance" type="button" onclick="renderMaintenance(); closeSidebar();">💾 Mantenimiento</button> 
 </aside>
 
 <main id="main"></main>
@@ -410,6 +419,16 @@ function formatCurrency(amount) {
 // ===============================================
 // LÓGICA DE INTERFAZ (AJUSTADA)
 // ===============================================
+// 💡 MEJORA 4: Función para marcar el botón de navegación activo
+function setActiveNavButton(viewName) {
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-view') === viewName) {
+            btn.classList.add('active');
+        }
+    });
+}
+
 menuToggle.onclick = () => {
   const isOpening = !sidebar.classList.contains("open");
   
@@ -453,11 +472,13 @@ function calculateLoanPortfolioSummary() {
     let netBalancePending = 0; // Principal + Interés
     let moraAmount = 0;
     let totalPrincipalLent = 0;
+    let totalInterestIncome = 0; // 💡 MEJORA: Cálculo de ingresos por interés
 
     for (const loan of allLoans) {
         // 1. Calcular el total a pagar (Principal + Interés)
         const totalPagar = Number(loan.amount) + Number(loan.totalInterest);
         totalPrincipalLent += Number(loan.amount);
+        totalInterestIncome += Number(loan.totalInterest); // Suma todo el interés potencial
 
         // 2. Monto pagado hasta la fecha
         const totalPaidAmount = allCobros
@@ -479,21 +500,23 @@ function calculateLoanPortfolioSummary() {
         }
     }
 
-    return { netBalancePending, moraAmount, totalPrincipalLent };
+    return { netBalancePending, moraAmount, totalPrincipalLent, totalInterestIncome };
 }
 
 
 function renderDashboard(){
+  setActiveNavButton('dashboard'); // MEJORA 4
   const clients = DB.get("clients").length;
   const cobros = DB.getInitialCobros(); 
   
   // 1. CÁLCULO DE GANANCIAS
-  const totalGanancias = cobros.reduce((a,b)=> a+Number(b.amount),0); 
+  const totalCobrado = cobros.reduce((a,b)=> a+Number(b.amount),0); 
 
   // 2. CÁLCULO DE SALDO PENDIENTE NETO Y MORA 
   const summary = calculateLoanPortfolioSummary();
   const netBalancePending = summary.netBalancePending; 
-  
+  const totalInterestIncome = summary.totalInterestIncome; // 💡 MEJORA: Nuevo campo
+
   const allLoans = DB.get("loans");
   const loansInMora = allLoans.filter(l => calculateLoanRisk(l).monthsBehind > 0); 
 
@@ -508,15 +531,21 @@ function renderDashboard(){
         </div>
         
         <div class="card" style="border-left: 5px solid #2ecc71;">
-            <h3>Ganancias Recibidas</h3>
-            <p style="font-size:36px; font-weight:bold;">${formatCurrency(totalGanancias)}</p>
+            <h3>Monto Cobrado</h3>
+            <p style="font-size:36px; font-weight:bold;">${formatCurrency(totalCobrado)}</p>
             <p style="margin:0; font-size:0.9em; color:#888;">Monto total de cobros históricos.</p>
         </div>
 
         <div class="card" style="border-left: 5px solid #1c5d99;">
-            <h3>Potencial de Ingreso</h3>
+            <h3>Potencial de Ingreso Total</h3>
             <p style="font-size:36px; font-weight:bold;">${formatCurrency(netBalancePending)}</p>
             <p style="margin:0; font-size:0.9em; color:#888;">Total (Ppal + Interés) por cobrar.</p>
+        </div>
+        
+        <div class="card" style="border-left: 5px solid #8e44ad;">
+            <h3>Interés Potencial</h3>
+            <p style="font-size:36px; font-weight:bold;">${formatCurrency(totalInterestIncome)}</p>
+            <p style="margin:0; font-size:0.9em; color:#888;">Total de intereses si todos pagan.</p>
         </div>
         
         <div class="card" style="border-left: 5px solid ${loansInMora.length > 0 ? '#e74c3c' : '#2ecc71'};">
@@ -526,6 +555,13 @@ function renderDashboard(){
             </p>
             <p style="margin:0; font-size:0.9em; color:#888;">Préstamos con 1+ cuota de atraso.</p>
         </div>
+        
+        <div class="card" style="border-left: 5px solid #f39c12;">
+            <h3>Monto en Mora</h3>
+            <p style="font-size:36px; font-weight:bold; color:#e74c3c;">${formatCurrency(summary.moraAmount)}</p>
+            <p style="margin:0; font-size:0.9em; color:#888;">Monto adeudado por cuotas vencidas.</p>
+        </div>
+        
     </div>
 
     <h3>Distribución de Capital Prestado</h3>
@@ -538,6 +574,7 @@ function renderDashboard(){
   
   renderLoanDistributionChart();
 }
+// ... [RESTO DE LA FUNCIÓN renderLoanDistributionChart SIN CAMBIOS] ...
 
 function renderLoanDistributionChart() {
     const loans = DB.get("loans");
@@ -605,6 +642,7 @@ function calculateTotalLoanAmount(clientId) {
 // VISTA: CLIENTES
 // ===============================================
 function renderClients(){
+    setActiveNavButton('clients'); // MEJORA 4
   main.innerHTML = `
     <h2>Clientes 👥</h2>
     <div style="margin-bottom:20px;">
@@ -631,6 +669,7 @@ function renderClients(){
   `;
   refreshClientsList();
 }
+// ... [RESTO DE LAS FUNCIONES DE CLIENTES (addClient, refreshClientsList, prepareEdit, cancelEdit, saveClient) SIN CAMBIOS IMPORTANTES] ...
 
 function addClient(){
   const name = document.getElementById("client-name").value.trim();
@@ -817,6 +856,7 @@ function saveClient(id) {
 // ===============================================
 
 function renderLoans() {
+    setActiveNavButton('loans'); // MEJORA 4
     const settings = DB.getSettings();
   main.innerHTML = `
     <h2>Préstamos 💵</h2>
@@ -845,13 +885,15 @@ function renderLoans() {
     
     <div style="margin-top:20px;">
         <h3>Préstamos Activos y Pagados</h3>
-        <div id="loans-list">
+        <div id="loans-list-container">
             </div>
     </div>
   `;
   populateClientSelect(); // Llena el selector de clientes
   refreshLoanList();      // Carga la lista de préstamos existentes
 }
+
+// ... [RESTO DE LAS FUNCIONES DE PRÉSTAMOS (populateClientSelect, calculateAndSaveLoan) SIN CAMBIOS IMPORTANTES] ...
 
 function populateClientSelect() {
     const clients = DB.get("clients");
@@ -1039,7 +1081,8 @@ function calculateLoanRisk(loan) {
 
 function refreshLoanList() {
     const loans = DB.get("loans");
-    const box = document.getElementById("loans-list");
+    // 💡 MEJORA: Cambio de ID para el contenedor de la lista de préstamos
+    const box = document.getElementById("loans-list-container"); 
     
     if (loans.length === 0) {
         box.innerHTML = '<p style="text-align:center;">No hay préstamos activos registrados.</p>';
@@ -1095,14 +1138,17 @@ function refreshLoanList() {
             </div>
         `;
     }).join("");
-    box.innerHTML = `<div id="loans-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">${tableRows}</div>`;
+    // 💡 MEJORA: Eliminación de la re-creación del div "loans-list" (se usa loans-list-container)
+    box.innerHTML = tableRows; 
 }
+
 
 // ===============================================
 // VISTA: COBROS (PAGOS)
 // ===============================================
 
 function renderCobros(loanIdToSelect = null) {
+    setActiveNavButton('cobros'); // MEJORA 4
     const settings = DB.getSettings();
     main.innerHTML = `
         <h2>Registro de Cobros 💰</h2>
@@ -1150,6 +1196,8 @@ function renderCobros(loanIdToSelect = null) {
     populateCobroSelectForInvoice(); 
     refreshPendingPayments();
 }
+
+// ... [RESTO DE LAS FUNCIONES DE COBROS (populateLoanSelect, populateCobroSelectForInvoice, generateInvoiceFromSelect, updatePaymentDetails, registerPayment, deleteCobro, etc.) CON LAS MEJORAS INTEGRADAS] ...
 
 function populateLoanSelect(loanIdToSelect) {
     const loans = DB.get("loans").filter(l => l.status !== 'Pagado');
@@ -1380,10 +1428,12 @@ function createInvoiceDocument(cobroId, previousState = {}) {
     const remainingBalanceBefore = totalPagar - totalPaidBefore; 
     
     // Recalcular la mora ANTES de este cobro para el desglose (basado en el estado ANTES)
+    // 💡 MEJORA: Usar una versión mock del préstamo para el cálculo de riesgo retroactivo
     const oldRisk = calculateLoanRisk({ 
         ...loan, 
         totalPaidAmount: totalPaidBefore, 
-        paymentsMade: paymentsMadeBefore 
+        paymentsMade: paymentsMadeBefore,
+        status: remainingBalanceBefore > 0.01 ? 'Activo' : 'Pagado'
     });
     
     // Cuanto de lo pagado cubrió la mora que había
@@ -1622,7 +1672,7 @@ function refreshPendingPayments() {
                     updatePaymentDetails();
                     document.getElementById('payment-amount').scrollIntoView({ behavior: 'smooth', block: 'center' }); 
                     document.getElementById('payment-amount').focus();" 
-                style="cursor:pointer;">
+                >
                 <td class="client-loan-cell">${l.clientName}</td>
                 <td>${l.paymentsMade}/${l.termMonths}</td>
                 <td>${nextDueText}</td>
@@ -1669,6 +1719,7 @@ function refreshPendingPayments() {
 // VISTA: HISTORIAL DE COBROS
 // ===============================================
 function renderCobrosHistory() {
+    setActiveNavButton('history'); // MEJORA 4
     main.innerHTML = `
         <h2>Historial de Transacciones (Cobros) 📜</h2>
         <div id="cobros-history-list"></div>
@@ -1776,6 +1827,7 @@ function deleteCobro(cobroId) {
 // VISTA: REPORTES (SIN BLOQUEO PREMIUM)
 // ===============================================
 function renderReports() {
+    setActiveNavButton('reports'); // MEJORA 4
     
     const summary = calculateLoanPortfolioSummary();
     
@@ -1807,6 +1859,7 @@ function renderReports() {
     renderClientRanking();
     renderMoraLoansDetail();
 }
+// ... [RESTO DE LAS FUNCIONES DE REPORTES (renderClientRanking, renderMoraLoansDetail) SIN CAMBIOS IMPORTANTES] ...
 
 function renderClientRanking() {
     const loans = DB.get("loans");
@@ -1914,6 +1967,7 @@ function renderMoraLoansDetail() {
 // VISTA: CONFIGURACIONES
 // ===============================================
 function renderSettings() {
+    setActiveNavButton('settings'); // MEJORA 4
     const settings = DB.getSettings();
     main.innerHTML = `
         <h2>Configuraciones Globales ⚙️</h2>
@@ -1954,6 +2008,7 @@ function saveSettings() {
 // VISTA: MANTENIMIENTO
 // ===============================================
 function renderMaintenance() {
+    setActiveNavButton('maintenance'); // MEJORA 4
     main.innerHTML = `
         <h2>Mantenimiento y Respaldo 💾</h2>
         
