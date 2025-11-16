@@ -1671,18 +1671,38 @@ function createInvoiceDocument(cobroId, previousState = {}) {
     return { doc, clientName: client.name, cobroDate: cobro.date };
 }
 
-// FUNCIÓN: GENERAR Y DESCARGAR FACTURA PDF
+// FUNCIÓN: GENERAR Y DESCARGAR FACTURA PDF (CORREGIDA PARA GITHUB PAGES)
 function generateInvoicePDF(cobroId, previousState = {}) {
     const result = createInvoiceDocument(cobroId, previousState);
     if (!result) return;
-    
+
     const { doc, clientName, cobroDate } = result;
 
     // 4. Guardar PDF y emitir mensaje de descarga
     const fileName = `Factura_Cobro_${clientName.replace(/\s/g, '_')}_${cobroDate.replace(/\//g, '-')}.pdf`;
-    doc.save(fileName);
-    // *** CAMBIO CLAVE AQUÍ ***
-    showToast(`Factura descargada: ${fileName}`, 'info'); 
+
+    try {
+        // GitHub Pages permite BLOB pero bloquea doc.save() en modales
+        const pdfBlob = doc.output('blob');
+        const url = URL.createObjectURL(pdfBlob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+
+        // Necesario para que funcione en algunos navegadores
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        URL.revokeObjectURL(url);
+
+        showToast(`Factura descargada: ${fileName}`, 'info');
+
+    } catch (err) {
+        console.error("Error al generar PDF:", err);
+        showToast("Error al descargar el PDF.", "error");
+    }
 }
 
 // FUNCIÓN: GENERAR Y VISUALIZAR FACTURA PDF (NUEVA)
@@ -1721,7 +1741,7 @@ function closeInvoiceModal() {
 function downloadInvoice() {
     if (currentCobroId) {
         // Al descargar desde el modal, siempre regeneramos la factura por si la DB ha cambiado
-        // Llamamos directamente a generateInvoicePDF para que descargue y muestre el Toast
+        // Usamos la función corregida para la descarga directa.
         generateInvoicePDF(currentCobroId); 
         closeInvoiceModal(); // Cerramos el modal después de iniciar la descarga
     } else {
