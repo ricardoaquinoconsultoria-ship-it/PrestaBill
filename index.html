@@ -306,6 +306,59 @@ table tr:not(.neutral-header):hover {
     background: #2ecc71;
 }
 
+/* === MEJORA 15: ESTILOS DE TOAST/SNACKBAR === */
+#snackbar {
+    visibility: hidden; /* Oculto por defecto. Lo mostramos con JS. */
+    min-width: 250px;
+    margin-left: -125px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 16px;
+    position: fixed;
+    z-index: 3000; /* Aseguramos que esté sobre todos los elementos */
+    left: 50%;
+    bottom: 30px; 
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    font-weight: bold;
+}
+
+#snackbar.show {
+    visibility: visible;
+    -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+/* Estilos de colores específicos para tipos de mensaje */
+#snackbar.success { background-color: #2ecc71; }
+#snackbar.error { background-color: #e74c3c; }
+#snackbar.warning { background-color: #f39c12; }
+#snackbar.info { background-color: #1c5d99; }
+
+/* Animaciones */
+@-webkit-keyframes fadein {
+    from {bottom: 0; opacity: 0;} 
+    to {bottom: 30px; opacity: 1;}
+}
+
+@keyframes fadein {
+    from {bottom: 0; opacity: 0;}
+    to {bottom: 30px; opacity: 1;}
+}
+
+@-webkit-keyframes fadeout {
+    from {bottom: 30px; opacity: 1;} 
+    to {bottom: 0; opacity: 0;}
+}
+
+@keyframes fadeout {
+    from {bottom: 30px; opacity: 1;}
+    to {bottom: 0; opacity: 0;}
+}
+/* === FIN MEJORA 15 === */
+
+
 /* === FIN DE ESTILOS DE REPORTES/MORA === */
 
 /* MEJORA RESPONSIVE: PARA VISTAS GRANDES (desktop), mantener el layout shifted */
@@ -355,6 +408,8 @@ table tr:not(.neutral-header):hover {
     </div>
 </div>
 
+<div id="snackbar"></div>
+
 <script>
 // ===============================================
 // LÓGICA GENERAL Y DB
@@ -398,6 +453,16 @@ const sidebar = document.getElementById("sidebar");
 const main = document.getElementById("main");
 const header = document.getElementById("app-header");
 const menuToggle = document.getElementById("menu-toggle");
+const snackbar = document.getElementById("snackbar"); // MEJORA 15
+
+// MEJORA 15: Función para mostrar el Toast/Snackbar
+function showToast(message, type = 'info') {
+    snackbar.textContent = message;
+    snackbar.className = "show " + type;
+    setTimeout(function(){ 
+        snackbar.className = snackbar.className.replace("show", ""); 
+    }, 3000);
+}
 
 // MEJORA 9: Función de formato de moneda centralizada
 function formatCurrency(amount) {
@@ -639,7 +704,10 @@ function addClient(){
   const phoneMain = document.getElementById("client-phone-main").value.trim();
   const phoneMobile = document.getElementById("client-phone-mobile").value.trim();
   
-  if(!name || !cedula) return alert("Nombre y Cédula son requeridos");
+  if(!name || !cedula) {
+    showToast("Nombre y Cédula son requeridos", 'error'); // MEJORA 15
+    return;
+  }
   
   const all = DB.get("clients");
   all.push({
@@ -660,6 +728,7 @@ function addClient(){
   document.getElementById("client-phone-mobile").value = '';
   
   refreshClientsList();
+  showToast("Cliente agregado correctamente", 'success'); // MEJORA 15
 }
 
 function refreshClientsList(searchTerm = ''){
@@ -742,8 +811,8 @@ function deleteClient(id) {
     const searchTerm = document.getElementById("client-search") ? document.getElementById("client-search").value : '';
     refreshClientsList(searchTerm);
     
-    // Mensaje de confirmación
-    alert("Cliente, préstamos y cobros asociados eliminados correctamente. Si tiene las pestañas de Préstamos o Cobros abiertas, deberá recargarlas para ver los cambios.");
+    // Mensaje de confirmación (MEJORA 15)
+    showToast("Cliente, préstamos y cobros asociados eliminados correctamente.", 'warning');
 }
 // ===============================================
 
@@ -791,7 +860,10 @@ function saveClient(id) {
     const phoneMain = document.getElementById(`edit-phone-main-${id}`).value.trim();
     const phoneMobile = document.getElementById(`edit-phone-mobile-${id}`).value.trim();
 
-    if(!name || !cedula) return alert("Nombre y Cédula son requeridos para guardar.");
+    if(!name || !cedula) {
+        showToast("Nombre y Cédula son requeridos para guardar.", 'error'); // MEJORA 15
+        return;
+    }
 
     let all = DB.get("clients");
     const index = all.findIndex(c => c.id === id);
@@ -810,6 +882,7 @@ function saveClient(id) {
     
     const searchTerm = document.getElementById("client-search") ? document.getElementById("client-search").value : '';
     refreshClientsList(searchTerm);
+    showToast("Cliente guardado correctamente.", 'success'); // MEJORA 15
 }
 
 // ===============================================
@@ -884,13 +957,20 @@ function calculateAndSaveLoan() {
     const interesBase = Number(document.getElementById("loan-interest-base").value); 
     const n = Number(document.getElementById("loan-term").value); // Plazo (meses)
     
-    if (!clientId) return alert("Por favor, seleccione un cliente.");
+    if (!clientId) {
+        showToast("Por favor, seleccione un cliente.", 'error'); // MEJORA 15
+        return;
+    }
     if (P <= 0 || interesBase < 0 || n <= 0) {
-        return alert("Por favor, complete todos los campos de la calculadora correctamente con valores positivos.");
+        showToast("Por favor, complete todos los campos de la calculadora correctamente con valores positivos.", 'error'); // MEJORA 15
+        return;
     }
 
     const client = DB.get("clients").find(c => c.id === clientId);
-    if (!client) return alert("Cliente no encontrado.");
+    if (!client) {
+        showToast("Cliente no encontrado.", 'error'); // MEJORA 15
+        return;
+    }
 
     // Lógica de Cuotas Iguales con Interés Proporcional
     // Tasa total de interés (proporcional a la tasa base de 3 meses)
@@ -931,7 +1011,7 @@ function calculateAndSaveLoan() {
     allLoans.push(newLoan);
     DB.set("loans", allLoans);
 
-    alert(`Préstamo registrado. Cuota Mensual: ${formatCurrency(newLoan.monthlyPayment)}`);
+    showToast(`Préstamo registrado. Cuota Mensual: ${formatCurrency(newLoan.monthlyPayment)}`, 'success'); // MEJORA 15
     
     // Limpiar formulario (manteniendo los valores por defecto)
     const settings = DB.getSettings();
@@ -966,7 +1046,7 @@ function deleteLoan(id) {
         refreshPendingPayments();
     }
 
-    alert("Préstamo y sus cobros asociados eliminados correctamente.");
+    showToast("Préstamo y sus cobros asociados eliminados correctamente.", 'warning'); // MEJORA 15
 }
 // ===============================================
 
@@ -1192,7 +1272,10 @@ function populateCobroSelectForInvoice() {
 
 function generateInvoiceFromSelect(viewOnly) {
     const cobroId = document.getElementById("invoice-cobro-id").value;
-    if (!cobroId) return alert("Por favor, seleccione un cobro del historial.");
+    if (!cobroId) {
+        showToast("Por favor, seleccione un cobro del historial.", 'error'); // MEJORA 15
+        return;
+    }
     
     // Al llamar sin el segundo parámetro (previousState), la función createInvoiceDocument 
     // recalculará el estado anterior retroactivamente.
@@ -1250,11 +1333,17 @@ function registerPayment() {
     const loanId = document.getElementById("payment-loan-id").value;
     const amount = Number(document.getElementById("payment-amount").value);
     
-    if (!loanId || amount <= 0) return alert("Seleccione un préstamo e ingrese un monto válido.");
+    if (!loanId || amount <= 0) {
+        showToast("Seleccione un préstamo e ingrese un monto válido.", 'error'); // MEJORA 15
+        return;
+    }
 
     let allLoans = DB.get("loans");
     const loanIndex = allLoans.findIndex(l => l.id === loanId);
-    if (loanIndex === -1) return alert("Préstamo no encontrado.");
+    if (loanIndex === -1) {
+        showToast("Préstamo no encontrado.", 'error'); // MEJORA 15
+        return;
+    }
 
     const loan = allLoans[loanIndex];
     const totalPagar = Number(loan.amount) + Number(loan.totalInterest);
@@ -1302,7 +1391,7 @@ function registerPayment() {
     allLoans[loanIndex] = loan;
     DB.set("loans", allLoans);
 
-    alert(`Cobro de ${formatCurrency(amount)} registrado para ${loan.clientName}.`);
+    showToast(`Cobro de ${formatCurrency(amount)} registrado para ${loan.clientName}.`, 'success'); // MEJORA 15
     
     // MEJORA 14: LÓGICA: GENERAR FACTURA AL COBRAR (PREGUNTA)
     if (confirm("Cobro exitoso. ¿Desea ver y descargar la factura del pago en PDF?")) {
@@ -1331,10 +1420,16 @@ let currentCobroId = null; // Variable global para saber qué cobro descargar
 function createInvoiceDocument(cobroId, previousState = {}) {
     // 1. Obtener Datos
     const cobro = DB.getInitialCobros().find(c => c.id === cobroId);
-    if (!cobro) { alert("Error: Cobro no encontrado."); return null; }
+    if (!cobro) { 
+        showToast("Error: Cobro no encontrado para la factura.", 'error'); // MEJORA 15
+        return null; 
+    }
 
     const loan = DB.get("loans").find(l => l.id === cobro.loanId);
-    if (!loan) { alert("Error: Préstamo asociado no encontrado."); return null; }
+    if (!loan) { 
+        showToast("Error: Préstamo asociado no encontrado para la factura.", 'error'); // MEJORA 15
+        return null; 
+    }
     
     // Intentar obtener datos completos del cliente
     const client = DB.get("clients").find(cl => cl.id === loan.clientId) || { 
@@ -1568,6 +1663,7 @@ function generateInvoicePDF(cobroId, previousState = {}) {
     // 4. Guardar PDF
     const fileName = `Factura_Cobro_${clientName.replace(/\s/g, '_')}_${cobroDate.replace(/\//g, '-')}.pdf`;
     doc.save(fileName);
+    showToast(`Factura descargada: ${fileName}`, 'info'); // MEJORA 15
 }
 
 // FUNCIÓN: GENERAR Y VISUALIZAR FACTURA PDF (NUEVA)
@@ -1608,7 +1704,7 @@ function downloadInvoice() {
         // Al descargar desde el modal, siempre regeneramos la factura por si la DB ha cambiado
         generateInvoicePDF(currentCobroId); 
     } else {
-        alert("No hay una factura seleccionada para descargar.");
+        showToast("No hay una factura seleccionada para descargar.", 'error'); // MEJORA 15
     }
 }
 // ===============================================
@@ -1787,7 +1883,7 @@ function deleteCobro(cobroId) {
         refreshPendingPayments();
     }
     
-    alert("Cobro eliminado y saldo de préstamo ajustado correctamente.");
+    showToast("Cobro eliminado y saldo de préstamo ajustado correctamente.", 'warning'); // MEJORA 15
 }
 // ===============================================
 
@@ -1955,7 +2051,8 @@ function saveSettings() {
     const baseInterestRate = Number(document.getElementById("setting-interest-rate").value);
     
     if (!currencySymbol || baseInterestRate < 0) {
-        return alert("Por favor, ingrese un símbolo de moneda y una tasa de interés base válida (mayor o igual a cero).");
+        showToast("Por favor, ingrese un símbolo de moneda y una tasa de interés base válida (mayor o igual a cero).", 'error'); // MEJORA 15
+        return;
     }
 
     const newSettings = {
@@ -1964,7 +2061,7 @@ function saveSettings() {
     };
     
     DB.set("settings", newSettings);
-    alert("Configuraciones guardadas. Es posible que deba recargar las vistas para ver los cambios de moneda.");
+    showToast("Configuraciones guardadas. Es posible que deba recargar las vistas para ver los cambios de moneda.", 'success'); // MEJORA 15
     
     // Recargar la vista actual para reflejar los cambios de inmediato
     renderSettings(); 
@@ -2004,7 +2101,7 @@ function resetData() {
         localStorage.removeItem("loans");
         localStorage.removeItem("cobros");
         localStorage.removeItem("settings");
-        alert("Todos los datos han sido eliminados. La aplicación se reiniciará al Dashboard.");
+        showToast("Todos los datos han sido eliminados. Se reiniciará la aplicación al Dashboard.", 'warning'); // MEJORA 15
         renderDashboard(); 
     }
 }
@@ -2026,7 +2123,7 @@ function exportData() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    alert("Datos exportados correctamente.");
+    showToast("Datos exportados correctamente.", 'success'); // MEJORA 15
 }
 
 function importData() {
@@ -2034,7 +2131,8 @@ function importData() {
     const file = fileInput.files[0];
     
     if (!file) {
-        return alert("Por favor, seleccione un archivo JSON para importar.");
+        showToast("Por favor, seleccione un archivo JSON para importar.", 'error'); // MEJORA 15
+        return;
     }
     
     if (!confirm("ADVERTENCIA: ¿Está seguro? La importación sobrescribirá TODOS los datos actuales con el contenido del archivo.")) {
@@ -2059,13 +2157,13 @@ function importData() {
                      DB.set("settings", DEFAULT_SETTINGS); 
                 }
                 
-                alert("Datos importados y restaurados correctamente. La aplicación se reiniciará al Dashboard.");
+                showToast("Datos importados y restaurados correctamente. Se reiniciará la aplicación al Dashboard.", 'success'); // MEJORA 15
                 renderDashboard();
             } else {
-                alert("Error: El archivo JSON no tiene la estructura de respaldo esperada (clients, loans, cobros).");
+                showToast("Error: El archivo JSON no tiene la estructura de respaldo esperada (clients, loans, cobros).", 'error'); // MEJORA 15
             }
         } catch (error) {
-            alert("Error al procesar el archivo: " + error.message);
+            showToast("Error al procesar el archivo: " + error.message, 'error'); // MEJORA 15
         }
     };
     reader.readAsText(file);
