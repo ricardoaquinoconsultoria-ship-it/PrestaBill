@@ -1589,7 +1589,8 @@ function createInvoiceDocument(cobroId, previousState = {}) {
         headStyles: { fillColor: [44, 62, 80], textColor: 255 },
         columnStyles: {
             0: { fontStyle: 'bold', cellWidth: 100 },
-            1: { halign: 'right', fontStyle: 'bold' }
+            // MEJORA: Alinear el encabezado a la derecha para que quede sobre las cifras
+            1: { halign: 'right', fontStyle: 'bold' } 
         },
         didParseCell: function(data) {
             // Estilo especial para la fila del monto total
@@ -1626,7 +1627,8 @@ function createInvoiceDocument(cobroId, previousState = {}) {
         headStyles: { fillColor: [28, 93, 153], textColor: 255 },
         columnStyles: {
             0: { fontStyle: 'bold', cellWidth: 100 },
-            1: { halign: 'right', fontStyle: 'bold' }
+            // MEJORA: Alinear el encabezado a la derecha para que quede sobre las cifras
+            1: { halign: 'right', fontStyle: 'bold' } 
         },
         didParseCell: function(data) {
             // Estilo especial para la fila del saldo final
