@@ -1662,10 +1662,11 @@ function generateInvoicePDF(cobroId, previousState = {}) {
     
     const { doc, clientName, cobroDate } = result;
 
-    // 4. Guardar PDF
+    // 4. Guardar PDF y emitir mensaje de descarga
     const fileName = `Factura_Cobro_${clientName.replace(/\s/g, '_')}_${cobroDate.replace(/\//g, '-')}.pdf`;
     doc.save(fileName);
-    showToast(`Factura descargada: ${fileName}`, 'info'); // MEJORA 15
+    // *** CAMBIO CLAVE AQUÍ ***
+    showToast(`Factura descargada: ${fileName}`, 'info'); 
 }
 
 // FUNCIÓN: GENERAR Y VISUALIZAR FACTURA PDF (NUEVA)
@@ -1704,7 +1705,9 @@ function closeInvoiceModal() {
 function downloadInvoice() {
     if (currentCobroId) {
         // Al descargar desde el modal, siempre regeneramos la factura por si la DB ha cambiado
+        // Llamamos directamente a generateInvoicePDF para que descargue y muestre el Toast
         generateInvoicePDF(currentCobroId); 
+        closeInvoiceModal(); // Cerramos el modal después de iniciar la descarga
     } else {
         showToast("No hay una factura seleccionada para descargar.", 'error'); // MEJORA 15
     }
