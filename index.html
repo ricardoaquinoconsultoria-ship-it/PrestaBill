@@ -53,13 +53,13 @@ header {
 
 /* SIDEBAR */
 aside {
-  width:260px;
+  width:100px; /* <--- MODIFICADO: Ancho reducido */
   background:#2c3e50; /* Color Sidebar (Gris Oscuro) */
   color:white;
   padding:10px 0; /* Padding ajustado */
   position:fixed;
   top:0; 
-  left:-260px; 
+  left:-100px; /* <--- MODIFICADO: Posición de cierre ajustada */
   height:100vh; 
   transition: left 0.3s ease;
   z-index:1001; 
@@ -320,8 +320,8 @@ table tr:not(.neutral-header):hover {
 /* MEJORA RESPONSIVE: PARA VISTAS GRANDES (desktop), mantener el layout shifted */
 @media (min-width: 768px) {
     main.shifted { 
-        /* En desktop, aplicar el margen cuando el menú está abierto */
-        margin-left: 260px; 
+        /* <--- MODIFICADO: Ahora el margen es 100px para que el main se mueva más a la izquierda */
+        margin-left: 100px; 
     }
 }
 </style>
