@@ -23,6 +23,11 @@ body {
   color: #333;
 }
 
+/* UX MEJORA: Bloquear scroll del cuerpo en móvil cuando el menú está abierto */
+body.no-scroll {
+    overflow: hidden;
+}
+
 /* HEADER - FIJO AL 100% */
 header { 
   background:#1c5d99; /* Color más profesional (Azul Oscuro) */
@@ -80,12 +85,18 @@ aside.open { left:0; }
   text-align:left; 
   border-radius:6px; 
   font-size:16px; 
-  transition: background 0.3s;
+  transition: background 0.3s, box-shadow 0.2s;
   font-weight: 400;
 }
 .nav-btn:hover { 
   background:#34495e; /* Hover más claro */
 } 
+/* UX MEJORA: Estilo para el focus (navegación por teclado) */
+.nav-btn:focus {
+    outline: 2px solid #5d99ff;
+    outline-offset: -2px;
+    background: #34495e; /* Igual que el hover para consistencia */
+}
 /* MEJORA 4: Estilo para el botón activo (opcional) */
 /* .nav-btn.active { background:#1c5d99; } */
 
@@ -306,18 +317,84 @@ table tr:not(.neutral-header):hover {
     background: #2ecc71;
 }
 
+/* UX MEJORA: Overlay de carga */
+#loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 5000;
+    transition: opacity 0.3s;
+    pointer-events: none; /* Permite clicks a través */
+    opacity: 0;
+}
+#loading-overlay.visible {
+    opacity: 1;
+    pointer-events: auto; /* Bloquea clicks cuando es visible */
+}
+.spinner {
+    border: 4px solid rgba(28, 93, 153, 0.1);
+    border-top: 4px solid #1c5d99;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 /* === FIN DE ESTILOS DE REPORTES/MORA === */
 
 /* MEJORA RESPONSIVE: PARA VISTAS GRANDES (desktop), mantener el layout shifted */
 @media (min-width: 768px) {
-    main.shifted { 
-        /* En desktop, aplicar el margen cuando el menú está abierto */
+    /* RESPONSIVE MEJORA: Sidebar siempre abierto en desktop */
+    aside {
+        left: 0; /* Sidebar abierto por defecto */
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* RESPONSIVE MEJORA: El main siempre tiene el margen en desktop */
+    main { 
         margin-left: 260px; 
+    }
+    
+    /* RESPONSIVE MEJORA: Ocultar el toggle de menú en desktop */
+    #menu-toggle {
+        display: none; 
+    }
+    
+    /* RESPONSIVE MEJORA: Ajuste del padding del header ya que el sidebar es visible */
+    header {
+        padding-left: 280px; /* Para que el contenido del header no se solape con el sidebar */
+    }
+    
+    /*body.no-scroll ya no es necesario en desktop, pero la clase no se aplica de todas formas*/
+}
+
+/* RESPONSIVE MEJORA: Para vistas móviles, el header es el normal */
+@media (max-width: 767px) {
+    /* El body ya tiene overflow: hidden cuando se aplica la clase no-scroll */
+    body.no-scroll {
+        overflow: hidden;
+    }
+    header {
+        padding-left: 15px; /* Vuelve al padding normal ya que el sidebar está cerrado */
     }
 }
 </style>
 </head>
 <body>
+
+<div id="loading-overlay">
+    <div class="spinner"></div>
+</div>
 
 <header id="app-header">
   <span id="menu-toggle" 
@@ -331,14 +408,14 @@ table tr:not(.neutral-header):hover {
 
 <aside id="sidebar">
     <h3 style="padding:15px; margin:0; text-align:center; color:#fff; border-bottom:1px solid #34495e;">Menú Principal</h3>
-  <button class="nav-btn" type="button" onclick="renderDashboard(); closeSidebar();">🏠 Inicio</button>
-  <button class="nav-btn" type="button" onclick="renderClients(); closeSidebar();">👥 Clientes</button>
-  <button class="nav-btn" type="button" onclick="renderLoans(); closeSidebar();">💵 Préstamos</button>
-  <button class="nav-btn" type="button" onclick="renderCobros(); closeSidebar();">💰 Cobros</button>
-  <button class="nav-btn" type="button" onclick="renderReports(); closeSidebar();">📊 Reportes</button>
-  <button class="nav-btn" type="button" onclick="renderCobrosHistory(); closeSidebar();">📜 Historial Transacciones</button>
-  <button class="nav-btn" type="button" onclick="renderSettings(); closeSidebar();">⚙️ Configuraciones</button>
-  <button class="nav-btn" type="button" onclick="renderMaintenance(); closeSidebar();">💾 Mantenimiento</button> 
+  <button class="nav-btn" type="button" onclick="renderView('Dashboard')">🏠 Inicio</button>
+  <button class="nav-btn" type="button" onclick="renderView('Clients')">👥 Clientes</button>
+  <button class="nav-btn" type="button" onclick="renderView('Loans')">💵 Préstamos</button>
+  <button class="nav-btn" type="button" onclick="renderView('Cobros')">💰 Cobros</button>
+  <button class="nav-btn" type="button" onclick="renderView('Reports')">📊 Reportes</button>
+  <button class="nav-btn" type="button" onclick="renderView('CobrosHistory')">📜 Historial Transacciones</button>
+  <button class="nav-btn" type="button" onclick="renderView('Settings')">⚙️ Configuraciones</button>
+  <button class="nav-btn" type="button" onclick="renderView('Maintenance')">💾 Mantenimiento</button> 
 </aside>
 
 <main id="main"></main>
@@ -398,12 +475,27 @@ const sidebar = document.getElementById("sidebar");
 const main = document.getElementById("main");
 const header = document.getElementById("app-header");
 const menuToggle = document.getElementById("menu-toggle");
+const body = document.body; // Referencia al body
+const loadingOverlay = document.getElementById("loading-overlay"); // Referencia al overlay
 
 // MEJORA 9: Función de formato de moneda centralizada
 function formatCurrency(amount) {
     const settings = DB.getSettings();
     // Usar toFixed(2) para asegurar dos decimales y devolver el string con el símbolo.
     return `${settings.currencySymbol} ${Number(amount).toFixed(2)}`;
+}
+
+// Función para mostrar el loading overlay
+function showLoading() {
+    loadingOverlay.classList.add('visible');
+}
+
+// Función para ocultar el loading overlay
+function hideLoading() {
+    // Usar un timeout pequeño para dar un efecto de transición suave
+    setTimeout(() => {
+        loadingOverlay.classList.remove('visible');
+    }, 300); 
 }
 
 
@@ -415,14 +507,15 @@ menuToggle.onclick = () => {
   
   sidebar.classList.toggle("open");
   
+  // UX MEJORA: Bloquear scroll del cuerpo en móvil
+  if (window.innerWidth < 768) {
+      body.classList.toggle("no-scroll", isOpening); 
+  }
+  
   // MEJORA 11: Actualizar atributos ARIA
   menuToggle.setAttribute('aria-expanded', isOpening.toString());
 
-  if (window.innerWidth >= 768) {
-     main.classList.toggle("shifted");
-  } else {
-     main.classList.remove("shifted"); 
-  }
+  // Lógica de desplazamiento en desktop: Eliminada, el sidebar está siempre abierto en CSS.
   
   // MEJORA 14: Enfocar el primer botón del sidebar al abrir
   if (isOpening) {
@@ -438,11 +531,49 @@ function closeSidebar() {
     sidebar.classList.remove("open");
     menuToggle.setAttribute('aria-expanded', 'false'); // MEJORA 11
     
-    if (window.innerWidth >= 768) {
-        main.classList.remove("shifted"); 
+    // UX MEJORA: Desbloquear scroll del cuerpo en móvil
+    if (window.innerWidth < 768) {
+        body.classList.remove("no-scroll"); 
     }
   }
+  // En desktop, no se cierra, se mantiene abierto por el CSS
 }
+
+
+// NUEVA FUNCIÓN: RENDERIZAR VISTAS CON ANIMACIÓN DE CARGA Y CIERRE DE SIDEBAR
+function renderView(viewName, param = null) {
+    showLoading(); // Muestra el overlay
+    
+    // Quitar la clase 'active' de todos los botones y ponerla en el botón clickeado
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    const clickedBtn = event.target;
+    if (clickedBtn && clickedBtn.classList.contains('nav-btn')) {
+        clickedBtn.classList.add('active');
+    }
+
+    // Usar un timeout para que la animación del loading se vea
+    setTimeout(() => {
+        switch(viewName) {
+            case 'Dashboard': renderDashboard(); break;
+            case 'Clients': renderClients(); break;
+            case 'Loans': renderLoans(); break;
+            case 'Cobros': renderCobros(param); break;
+            case 'Reports': renderReports(); break;
+            case 'CobrosHistory': renderCobrosHistory(); break;
+            case 'Settings': renderSettings(); break;
+            case 'Maintenance': renderMaintenance(); break;
+            default: renderDashboard();
+        }
+        
+        // Cierra el sidebar solo si estamos en vista móvil
+        if (window.innerWidth < 768) {
+            closeSidebar(); 
+        }
+        
+        hideLoading(); // Oculta el overlay
+    }, 400); // 400ms para permitir la animación de carga y el cierre del sidebar
+}
+
 
 // ===============================================
 // VISTA: DASHBOARD
@@ -521,7 +652,7 @@ function renderDashboard(){
         
         <div class="card" style="border-left: 5px solid ${loansInMora.length > 0 ? '#e74c3c' : '#2ecc71'};">
             <h3>Préstamos en Mora ⚠️</h3>
-            <p style="font-size:36px; font-weight:bold; color: ${loansInMora.length > 0 ? '#e74c3c' : '#2ecc71'};">
+            <p style="font-size:36px; font-weight:bold; color: ${loansInMora.length > 0 ? '#e74c3c' : '#e74c3c'};">
                 ${loansInMora.length}
             </p>
             <p style="margin:0; font-size:0.9em; color:#888;">Préstamos con 1+ cuota de atraso.</p>
@@ -1089,7 +1220,7 @@ function refreshLoanList() {
                 </div>
                 
                 <div style="display:flex; gap:10px; margin-top:10px;">
-                    <button class="action-btn" style="flex:1; background:#1c5d99;" onclick="renderCobros('${l.id}')">💰 Registrar Cobro</button>
+                    <button class="action-btn" style="flex:1; background:#1c5d99;" onclick="renderView('Cobros', '${l.id}')">💰 Registrar Cobro</button>
                     <button class="action-btn" style="flex:1; background:#e74c3c;" onclick="deleteLoan('${l.id}')">🗑️ Eliminar</button>
                 </div>
             </div>
@@ -1987,7 +2118,7 @@ function resetData() {
         localStorage.removeItem("cobros");
         localStorage.removeItem("settings");
         alert("Todos los datos han sido eliminados. La aplicación se reiniciará al Dashboard.");
-        renderDashboard(); 
+        renderView('Dashboard'); // Usar la nueva función para recargar
     }
 }
 
@@ -2042,7 +2173,7 @@ function importData() {
                 }
                 
                 alert("Datos importados y restaurados correctamente. La aplicación se reiniciará al Dashboard.");
-                renderDashboard();
+                renderView('Dashboard'); // Usar la nueva función para recargar
             } else {
                 alert("Error: El archivo JSON no tiene la estructura de respaldo esperada (clients, loans, cobros).");
             }
@@ -2056,7 +2187,19 @@ function importData() {
 // ===============================================
 // INICIALIZACIÓN
 // ===============================================
-document.addEventListener("DOMContentLoaded", renderDashboard);
+document.addEventListener("DOMContentLoaded", () => {
+    // Inicializa la vista con el dashboard
+    renderView('Dashboard'); 
+    
+    // Si es desktop, el sidebar ya está abierto por CSS, no es necesario hacer toggle.
+    if (window.innerWidth >= 768) {
+        // Asegurar que el primer botón esté activo al cargar en desktop
+        const firstNavBtn = sidebar.querySelector('.nav-btn');
+        if (firstNavBtn) {
+            firstNavBtn.classList.add('active');
+        }
+    }
+});
 
 </script>
 </body>
