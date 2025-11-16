@@ -6,7 +6,7 @@
 <title>Presta Bill - Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
 
 <style>
@@ -1428,28 +1428,26 @@ function registerPayment() {
     refreshPendingPayments();
 }
 
+// ===============================================
+// MEJORA 14: FUNCIONES DE FACTURACIÓN PDF (ACTUALIZADO CON autoTable Y DETALLES DE RECIBO)
+// ===============================================
 let currentCobroId = null; // Variable global para saber qué cobro descargar
 
-/**
- * Crea el documento jsPDF con el contenido de la factura.
- * @param {string} cobroId - ID del cobro.
- * @param {object} previousState - Estado del préstamo antes del cobro (opcional).
- * @returns {object|null} - Objeto con el documento PDF y metadatos o null en caso de error.
- */
 function createInvoiceDocument(cobroId, previousState = {}) {
     // 1. Obtener Datos
     const cobro = DB.getInitialCobros().find(c => c.id === cobroId);
     if (!cobro) { 
-        showToast("Error: Cobro no encontrado para la factura.", 'error');
+        showToast("Error: Cobro no encontrado para la factura.", 'error'); // MEJORA 15
         return null; 
     }
 
     const loan = DB.get("loans").find(l => l.id === cobro.loanId);
     if (!loan) { 
-        showToast("Error: Préstamo asociado no encontrado para la factura.", 'error');
+        showToast("Error: Préstamo asociado no encontrado para la factura.", 'error'); // MEJORA 15
         return null; 
     }
     
+    // Intentar obtener datos completos del cliente
     const client = DB.get("clients").find(cl => cl.id === loan.clientId) || { 
         name: loan.clientName, 
         cedula: 'N/A', 
@@ -1460,78 +1458,80 @@ function createInvoiceDocument(cobroId, previousState = {}) {
     
     const settings = DB.getSettings();
     
+    // 2. Calcular Saldos
     const amountPaid = Number(cobro.amount);
     const totalPagar = Number(loan.amount) + Number(loan.totalInterest);
     const cuotaMensual = Number(loan.monthlyPayment);
     
-    // Determinar si el estado anterior fue pasado como parámetro (registro de cobro en vivo)
+    // Determinar si se usa el estado de la DB o se recalcula retroactivamente
     const isStateProvided = previousState.oldTotalPaidAmount !== undefined;
 
     let totalPaidBefore = 0;
     let paymentsMadeBefore = 0;
     
     if (!isStateProvided) {
-        // Si no se pasó el estado, calcularlo retroactivamente
+        // Recalcular el total pagado antes de ESTE cobro de forma retroactiva
         const allCobrosForLoan = DB.getInitialCobros()
             .filter(c => c.loanId === loan.id)
             .sort((a, b) => new Date(a.fullDateTime) - new Date(b.fullDateTime));
         
-        // Sumar todos los cobros que sean ANTERIORES al cobro actual
+        // Sumar todos los cobros anteriores al cobro actual
         for (const c of allCobrosForLoan) {
-            if (c.id === cobro.id) break;
+            if (c.id === cobro.id) break; // Detener en el cobro que estamos facturando
             totalPaidBefore += Number(c.amount);
         }
         paymentsMadeBefore = Math.floor(totalPaidBefore / cuotaMensual);
 
     } else {
-        // Usar el estado pasado si se proporcionó
         totalPaidBefore = previousState.oldTotalPaidAmount;
         paymentsMadeBefore = previousState.oldPaymentsMade;
     }
     
+    // *** CORRECCIÓN CRÍTICA: Definir el saldo restante ANTES del pago
     const remainingBalanceBefore = totalPagar - totalPaidBefore; 
     
-    // Calcular mora ANTES de este cobro
+    // Recalcular la mora ANTES de este cobro para el desglose (basado en el estado ANTES)
     const oldRisk = calculateLoanRisk({ 
         ...loan, 
         totalPaidAmount: totalPaidBefore, 
         paymentsMade: paymentsMadeBefore 
     });
     
-    // Desglose del pago
+    // Cuanto de lo pagado cubrió la mora que había
     const moraPagada = Math.min(amountPaid, oldRisk.totalDue);
+    
+    // Abono que queda después de pagar la mora
     let abonoPrincipalInteres = amountPaid - moraPagada; 
     
-    let abonoNormal = 0;
+    // Lógica para determinar el abono extra (adelanto)
     let abonoProximaCuota = 0;
+    let abonoNormal = 0; // Monto que fue a cubrir la parte "normal" de la deuda (la cuota actual)
 
     if (abonoPrincipalInteres > 0) {
-        // Primero, cuánto se necesita para cubrir la próxima cuota completa
+        // El abono normal es la porción que va a cubrir la cuota mensual
         abonoNormal = Math.min(cuotaMensual, abonoPrincipalInteres);
-        // Si queda algo, es aporte extra/adelanto
+        
+        // El adelanto es el excedente después de cubrir la mora y la cuota normal
         abonoProximaCuota = Math.max(0, abonoPrincipalInteres - abonoNormal);
     }
     
-    // Ajustes finales de balances
+    // Aseguramos que el pago a la próxima cuota no sea negativo (aunque el cálculo anterior lo evita)
+    abonoProximaCuota = Math.max(0, abonoProximaCuota);
+    
+    // Datos Finales
     const remainingBalanceAfter = totalPagar - (totalPaidBefore + amountPaid);
-    // Nota: las cuotas pagadas se cuentan por la división entre cuotaMensual, que es la forma en que se actualiza el loan
+    // Para la factura, usar el cálculo simple de pagos/cuotas
     const paymentsMadeAfter = Math.floor((totalPaidBefore + amountPaid) / cuotaMensual); 
 
 
-    // ============================
-    // GENERACIÓN DEL PDF
-    // ============================
-    const doc = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "letter"
-    });
-    const pageWidth = doc.internal.pageSize.getWidth();
-    let y = 15;
+    // 3. Crear Documento PDF
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth(); // Para centrar elementos
+    let y = 15; // Posición inicial Y
 
-    // Título y encabezado
+    // --- ENCABEZADO Y DATOS DE EMPRESA (Tú) ---
     doc.setFontSize(18);
-    doc.setTextColor(28, 93, 153);
+    doc.setTextColor(28, 93, 153); // Azul Oscuro
     doc.text("RECIBO DE PAGO", pageWidth / 2, y, { align: "center" });
     y += 10;
     
@@ -1542,41 +1542,56 @@ function createInvoiceDocument(cobroId, previousState = {}) {
     doc.text("Tel: N/A - Dir: N/A", pageWidth / 2, y, { align: "center" });
     y += 10;
     
+    // --- LÍNEA SEPARADORA ---
     doc.setDrawColor(200, 200, 200);
     doc.line(10, y, pageWidth - 10, y);
     y += 5;
 
-    // Datos del cliente y préstamo
+    // --- DETALLES DEL RECIBO EN FORMATO PROFESIONAL DE 2 COLUMNAS ---
     doc.setFontSize(12);
     doc.setTextColor(0, 0, 0);
 
     const marginLeft = 10;
-    const columnWidth = (pageWidth - 20) / 2;
-    const col1X = marginLeft;
-    const col2X = marginLeft + columnWidth + 5;
+    // const marginRight = pageWidth - 10; // No se usa directamente aquí
 
+    const columnWidth = (pageWidth - 20) / 2; // ancho exacto de cada columna
+    const col1X = marginLeft;
+    const col2X = marginLeft + columnWidth + 5; // separador profesional
+
+    // Helper para escribir pares de campos (integrado en el scope de la función)
     function writeRow(leftText, rightText) {
         doc.text(leftText, col1X, y);
+        // Alineación derecha para el segundo campo, usando el ancho de columna
         doc.text(rightText, col2X + columnWidth - 5, y, { align: "right" }); 
-        y += 7;
+        y += 7; // Espaciado entre filas
     }
 
-    writeRow(`Recibo No: ${cobro.id.toUpperCase().substring(0, 8)}`, `Fecha: ${cobro.date}`);
-    writeRow(`Cliente: ${client.name}`, `Cédula: ${client.cedula || 'N/A'}`);
-    writeRow(`Préstamo ID: ${loan.id.toUpperCase().substring(0, 8)}`, `Cuota Mensual Fija: ${formatCurrency(cuotaMensual)}`);
-    writeRow(`Monto Principal: ${formatCurrency(loan.amount)}`, `Total a Pagar (Ppal + Int): ${formatCurrency(totalPagar)}`);
+    writeRow(`Recibo No: ${cobro.id.toUpperCase().substring(0, 8)}`, 
+             `Fecha: ${cobro.date}`);
 
-    y += 5;
+    writeRow(`Cliente: ${client.name}`, 
+             `Cédula: ${client.cedula || 'N/A'}`);
 
+    writeRow(`Préstamo ID: ${loan.id.toUpperCase().substring(0, 8)}`, 
+             `Cuota Mensual Fija: ${formatCurrency(cuotaMensual)}`);
+
+    writeRow(`Monto Principal: ${formatCurrency(loan.amount)}`, 
+             `Total a Pagar (Ppal + Int): ${formatCurrency(totalPagar)}`);
+
+    y += 5; // Separación para la tabla
+
+    // --- LÍNEA SEPARADORA ---
     doc.setDrawColor(200, 200, 200);
     doc.line(10, y, pageWidth - 10, y);
     y += 5;
 
-    // Desglose del pago
+    // --- TABLA DE DESGLOSE DE PAGO (USANDO autoTable) ---
     let desgloseData = [
+         // Si había mora, mostrarla
         ...(moraPagada > 0 ? [["Mora Atrasada Cubierta:", formatCurrency(moraPagada)]] : []),
         ["Abono a Cuota Normal:", formatCurrency(abonoNormal)],
         ...(abonoProximaCuota > 0 ? [["Aporte Extra/Adelanto Cuota:", formatCurrency(abonoProximaCuota)]] : []),
+        // Línea divisoria en el desglose
         ["--------------------------------", "--------------------------------"],
         ["MONTO TOTAL DE ESTE COBRO:", formatCurrency(amountPaid)],
     ];
@@ -1590,17 +1605,19 @@ function createInvoiceDocument(cobroId, previousState = {}) {
         headStyles: { fillColor: [44, 62, 80], textColor: 255 },
         columnStyles: {
             0: { fontStyle: 'bold', cellWidth: 100 },
+            // MEJORA: Alinear el encabezado a la derecha para que quede sobre las cifras
             1: { halign: 'right', fontStyle: 'bold' } 
         },
         didParseCell: function(data) {
+            // Estilo especial para la fila del monto total
             if (data.row.index === desgloseData.length - 1) {
-                data.cell.styles.fillColor = [220, 240, 220]; 
+                data.cell.styles.fillColor = [220, 240, 220]; // Verde claro
             }
         },
         willDrawCell: function(data) {
             if (data.row.index === desgloseData.length - 1 && data.section === 'body') {
                 doc.setFontSize(12);
-                doc.setTextColor(46, 204, 113); 
+                doc.setTextColor(46, 204, 113); // Color verde para el monto pagado
             } else if (data.section === 'body') {
                  doc.setFontSize(10);
                  doc.setTextColor(0, 0, 0);
@@ -1610,7 +1627,7 @@ function createInvoiceDocument(cobroId, previousState = {}) {
     
     y = doc.autoTable.previous.finalY + 5;
 
-    // Estado del préstamo
+    // --- TABLA DE SALDOS FINALES (USANDO autoTable) ---
     const finalData = [
         ["Saldo Pendiente ANTES de este Pago:", formatCurrency(remainingBalanceBefore)],
         ["SALDO PENDIENTE DESPUÉS del Pago:", formatCurrency(remainingBalanceAfter)],
@@ -1626,9 +1643,11 @@ function createInvoiceDocument(cobroId, previousState = {}) {
         headStyles: { fillColor: [28, 93, 153], textColor: 255 },
         columnStyles: {
             0: { fontStyle: 'bold', cellWidth: 100 },
+            // MEJORA: Alinear el encabezado a la derecha para que quede sobre las cifras
             1: { halign: 'right', fontStyle: 'bold' } 
         },
         didParseCell: function(data) {
+            // Estilo especial para la fila del saldo final
             if (data.row.index === 1) {
                 data.cell.styles.fillColor = [200, 220, 240];
             }
@@ -1637,77 +1656,76 @@ function createInvoiceDocument(cobroId, previousState = {}) {
 
     y = doc.autoTable.previous.finalY + 10;
     
-    // Pie de página
+    // --- NOTAS FINALES ---
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
     doc.text('Este documento es un comprobante de pago. Guarde para sus registros.', 10, y);
     y += 5;
     doc.text(`*El estado final del préstamo es: ${remainingBalanceAfter > 0.01 ? 'Activo' : 'Pagado'}.`, 10, y);
 
-    y = doc.internal.pageSize.height - 30;
+    // --- PIE DE PÁGINA (Firma) ---
+    y = doc.internal.pageSize.height - 30; // 30mm desde el fondo
     doc.line(70, y, 140, y);
     doc.text('Firma/Sello de Presta Bill', pageWidth / 2, y + 5, { align: "center" });
 
     return { doc, clientName: client.name, cobroDate: cobro.date };
 }
 
-/**
- * Genera el PDF y fuerza la descarga al disco duro.
- * @param {string} cobroId - ID del cobro.
- * @param {object} previousState - Estado del préstamo antes del cobro.
- */
+// FUNCIÓN: GENERAR Y DESCARGAR FACTURA PDF
 function generateInvoicePDF(cobroId, previousState = {}) {
     const result = createInvoiceDocument(cobroId, previousState);
     if (!result) return;
     
     const { doc, clientName, cobroDate } = result;
+
+    // 4. Guardar PDF y emitir mensaje de descarga
     const fileName = `Factura_Cobro_${clientName.replace(/\s/g, '_')}_${cobroDate.replace(/\//g, '-')}.pdf`;
-    
-    doc.save(fileName); 
-    showToast(`Factura descargada: ${fileName}`, 'info');
+    doc.save(fileName);
+    // *** CAMBIO CLAVE AQUÍ ***
+    showToast(`Factura descargada: ${fileName}`, 'info'); 
 }
 
-/**
- * Genera el PDF y lo muestra en el iframe del modal.
- * @param {string} cobroId - ID del cobro.
- * @param {object} previousState - Estado del préstamo antes del cobro.
- */
+// FUNCIÓN: GENERAR Y VISUALIZAR FACTURA PDF (NUEVA)
 function viewInvoicePDF(cobroId, previousState = {}) {
     const result = createInvoiceDocument(cobroId, previousState);
     if (!result) return;
     
     const { doc, clientName, cobroDate } = result;
-    
-    // **USANDO BLOBURL PARA VISUALIZAR EN IFRAME**
+
+    // 1. Convertir el PDF a Data URI
     const pdfDataUri = doc.output('datauristring');
     
+    // 2. Cargar en el iframe
     const iframe = document.getElementById('invoice-iframe');
     const modal = document.getElementById('invoice-modal');
     const title = document.getElementById('modal-invoice-title');
     
     iframe.src = pdfDataUri;
     title.textContent = `Factura de Cobro: ${clientName} (${cobroDate})`;
+    currentCobroId = cobroId; // Guardar el ID para la descarga
     
-    currentCobroId = cobroId;
+    // 3. Mostrar el modal
     modal.style.display = 'flex';
 }
 
+// Función para cerrar el modal
 function closeInvoiceModal() {
     const modal = document.getElementById('invoice-modal');
     const iframe = document.getElementById('invoice-iframe');
     modal.style.display = 'none';
-    iframe.src = 'about:blank';
-    currentCobroId = null;
+    iframe.src = 'about:blank'; // Limpiar el iframe
+    currentCobroId = null; // Limpiar el ID
 }
 
+// Función que usa el ID global para la descarga
 function downloadInvoice() {
     if (currentCobroId) {
-        // Al descargar, volvemos a llamar a generateInvoicePDF para asegurar la descarga directa
-        // No pasamos previousState porque generateInvoicePDF lo recalcula si es necesario
-        generateInvoicePDF(currentCobroId);
-        closeInvoiceModal();
+        // Al descargar desde el modal, siempre regeneramos la factura por si la DB ha cambiado
+        // Llamamos directamente a generateInvoicePDF para que descargue y muestre el Toast
+        generateInvoicePDF(currentCobroId); 
+        closeInvoiceModal(); // Cerramos el modal después de iniciar la descarga
     } else {
-        showToast("No hay una factura seleccionada para descargar.", 'error');
+        showToast("No hay una factura seleccionada para descargar.", 'error'); // MEJORA 15
     }
 }
 // ===============================================
