@@ -502,7 +502,7 @@ table tr:not(.neutral-header):hover {
 
 <script>
 // ===============================================
-// LÓGICA DE SUSCRIPCIÓN (TU CÓDIGO)
+// LÓGICA DE SUSCRIPCIÓN (TU CÓDIGO) - CORREGIDO
 // ===============================================
 const TRIAL_DAYS = 3;
 
@@ -530,40 +530,53 @@ function verificarAcceso() {
   }
 }
 
-// Abrir/cerrar modal
-function abrirModal(){ document.getElementById("modal-overlay").style.display = "flex"; }
+// Abrir/cerrar modal - AÑADIDA LLAMADA A CARGAR BOTÓN AQUÍ
+function abrirModal(){ 
+    document.getElementById("modal-overlay").style.display = "flex"; 
+    // CARGA EL BOTÓN SÓLO AL ABRIR EL MODAL
+    if (!suscripcionActiva()) {
+        cargarBotonPayPal();
+    }
+}
 function cerrarModal(){ document.getElementById("modal-overlay").style.display = "none"; }
 
-// Botón PayPal
+// Botón PayPal - CORREGIDO PARA FORZAR LA RECARGA
 function cargarBotonPayPal() {
-  // Solo cargar el botón si no está ya cargado y si la suscripción está inactiva
-  if(!document.querySelector('#paypal-button-container iframe') && !suscripcionActiva()) {
-    paypal.Buttons({
-      style: { shape:'rect', color:'gold', layout:'vertical', label:'subscribe' },
-      createSubscription: function(data, actions){
-        return actions.subscription.create({
-          plan_id: 'lYuXwwQW4lGA6LfZBic3BBpRhxCjZj4zv_2gRVR-' // Tu Plan ID
-        });
-      },
-      onApprove: function(data){
-        localStorage.setItem("paypalSubscription","active");
-        cerrarModal();
-        showToast('¡Suscripción completada! Acceso Premium Activado.', 'success'); // Usa el Toast de la app
-        // Opcional: Recargar el Dashboard para limpiar el modal
-        renderDashboard(); 
-      },
-      onCancel: function (data) {
-          showToast('Suscripción cancelada.', 'info');
-      },
-      onError: function (err) {
-          showToast('Error en la suscripción: ' + err, 'error');
-      }
-    }).render('#paypal-button-container');
-  } else if (suscripcionActiva()) {
-      // Si ya está activo, mostrar un mensaje de éxito en lugar del botón (opcional)
-      document.getElementById('paypal-button-container').innerHTML = 
+  const container = document.getElementById('paypal-button-container');
+
+  // Si ya está activo, mostrar un mensaje de éxito en lugar del botón
+  if (suscripcionActiva()) {
+      container.innerHTML = 
         '<p style="color:#2ecc71; font-weight:bold;">¡Ya tienes una Suscripción Premium activa!</p>';
-  }
+      return; 
+  } 
+
+  // LIMPIAR CONTENEDOR ANTES DE RENDERIZAR (SOLUCIÓN)
+  container.innerHTML = ''; 
+
+  // Renderizar el botón
+  paypal.Buttons({
+    style: { shape:'rect', color:'gold', layout:'vertical', label:'subscribe' },
+    createSubscription: function(data, actions){
+      return actions.subscription.create({
+        plan_id: 'lYuXwwQW4lGA6LfZBic3BBpRhxCjZj4zv_2gRVR-' // Tu Plan ID
+      });
+    },
+    onApprove: function(data){
+      localStorage.setItem("paypalSubscription","active");
+      cerrarModal();
+      showToast('¡Suscripción completada! Acceso Premium Activado.', 'success'); // Usa el Toast de la app
+      // Opcional: Recargar el Dashboard para limpiar el modal
+      renderDashboard(); 
+    },
+    onCancel: function (data) {
+        showToast('Suscripción cancelada.', 'info');
+    },
+    onError: function (err) {
+        showToast('Error en la suscripción: ' + err, 'error');
+    }
+  }).render(container); // Renderiza en el contenedor limpiado
+
 }
 // ===============================================
 
@@ -655,10 +668,7 @@ menuToggle.onclick = () => {
       }
   }
   
-  // Cargar el botón de PayPal al abrir el menú si no está activo
-  if (isOpening && !suscripcionActiva()) {
-      cargarBotonPayPal();
-  }
+  // ELIMINADA LA LLAMADA A cargarBotonPayPal() AQUÍ: se llama al abrirModal() ahora.
 };
 
 function closeSidebar() {
@@ -731,7 +741,7 @@ function renderDashboard(){
     premiumWarning = `
       <div class="card" style="border-left: 5px solid #e74c3c; background: #fff0f0; margin-bottom: 20px;">
         <h3 style="color:#e74c3c; margin-top:0;">⚠️ ¡Tu Período de Prueba ha Expirado!</h3>
-        <p>Tu aplicación está ahora en modo limitado. Por favor, haz clic en el botón **"Suscripción"** del menú para desbloquear todas las funciones, incluyendo el registro de nuevos datos.</p>
+        <p>Tu aplicación está ahora en modo limitado. Por favor, haz clic en el botón **"Suscripción"** del menú para desbloquear todas las funciones sin restricciones.</p>
         <button class="action-btn" style="background:#e74c3c;" onclick="abrirModal()">Ir a Suscripción</button>
       </div>
     `;
@@ -2481,13 +2491,11 @@ function resetSubscriptionState() {
 
 
 // ===============================================
-// INICIALIZACIÓN
+// INICIALIZACIÓN - AJUSTADA
 // ===============================================
 document.addEventListener("DOMContentLoaded", function() {
-    // Asegurar que se cargue el botón de PayPal si el trial terminó o está activo
-    if (!suscripcionActiva()) {
-         cargarBotonPayPal();
-    }
+    // ELIMINADA: La llamada inicial a cargarBotonPayPal() ya no es necesaria, 
+    // se llama al abrirModal() si la suscripción está inactiva.
     
     // Verificar si el modal debe abrirse al cargar la página si el trial ha expirado
     verificarAcceso(); 
