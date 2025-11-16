@@ -1324,7 +1324,7 @@ function registerPayment() {
 }
 
 // ===============================================
-// MEJORA 14: FUNCIONES DE FACTURACIÓN PDF (ACTUALIZADO CON autoTable)
+// MEJORA 14: FUNCIONES DE FACTURACIÓN PDF (ACTUALIZADO CON autoTable Y DETALLES DE RECIBO)
 // ===============================================
 let currentCobroId = null; // Variable global para saber qué cobro descargar
 
@@ -1436,28 +1436,43 @@ function createInvoiceDocument(cobroId, previousState = {}) {
     doc.line(10, y, pageWidth - 10, y);
     y += 5;
 
-    // --- DETALLES DE LA TRANSACCIÓN y CLIENTE (Lado a Lado - USANDO LAS COORDENADAS ORIGINALES) ---
+    // --- DETALLES DEL RECIBO EN FORMATO PROFESIONAL DE 2 COLUMNAS ---
     doc.setFontSize(12);
     doc.setTextColor(0, 0, 0);
-    
-    const leftX = 10;
-    const rightX = pageWidth - 90; // Coordenada derecha para los campos
-    
-    doc.text(`Recibo No: ${cobro.id.toUpperCase().substring(0, 8)}`, leftX, y);
-    doc.text(`Fecha: ${cobro.date}`, rightX, y);
-    y += 6;
 
-    doc.text(`Cliente: ${client.name}`, leftX, y);
-    doc.text(`Cédula: ${client.cedula || 'N/A'}`, rightX, y);
-    y += 6;
-    
-    doc.text(`Préstamo ID: ${loan.id.toUpperCase().substring(0, 8)}`, leftX, y);
-    doc.text(`Cuota Mensual Fija: ${formatCurrency(cuotaMensual)}`, rightX, y);
-    y += 6;
-    
-    doc.text(`Monto Principal: ${formatCurrency(loan.amount)}`, leftX, y);
-    doc.text(`Total a Pagar (Ppal + Int): ${formatCurrency(totalPagar)}`, rightX, y);
-    y += 8;
+    const marginLeft = 10;
+    // const marginRight = pageWidth - 10; // No se usa directamente aquí
+
+    const columnWidth = (pageWidth - 20) / 2; // ancho exacto de cada columna
+    const col1X = marginLeft;
+    const col2X = marginLeft + columnWidth + 5; // separador profesional
+
+    // Helper para escribir pares de campos (integrado en el scope de la función)
+    function writeRow(leftText, rightText) {
+        doc.text(leftText, col1X, y);
+        // Alineación derecha para el segundo campo, usando el ancho de columna
+        doc.text(rightText, col2X + columnWidth - 5, y, { align: "right" }); 
+        y += 7; // Espaciado entre filas
+    }
+
+    writeRow(`Recibo No: ${cobro.id.toUpperCase().substring(0, 8)}`, 
+             `Fecha: ${cobro.date}`);
+
+    writeRow(`Cliente: ${client.name}`, 
+             `Cédula: ${client.cedula || 'N/A'}`);
+
+    writeRow(`Préstamo ID: ${loan.id.toUpperCase().substring(0, 8)}`, 
+             `Cuota Mensual Fija: ${formatCurrency(cuotaMensual)}`);
+
+    writeRow(`Monto Principal: ${formatCurrency(loan.amount)}`, 
+             `Total a Pagar (Ppal + Int): ${formatCurrency(totalPagar)}`);
+
+    y += 5; // Separación para la tabla
+
+    // --- LÍNEA SEPARADORA ---
+    doc.setDrawColor(200, 200, 200);
+    doc.line(10, y, pageWidth - 10, y);
+    y += 5;
 
     // --- TABLA DE DESGLOSE DE PAGO (USANDO autoTable) ---
     let desgloseData = [
