@@ -4,31 +4,32 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Presta Bill - Dashboard</title>
-    
-<meta property="og:title" content="PrestaBill - Gestión de Préstamos Fácil" />
-<meta property="og:description" content="Sistema de gestión simple para clientes, préstamos y cobros." />
-<meta property="og:image" content="https://ricardoaquinoconsultoria-ship-it.github.io/PrestaBill/image.png" />
-<meta property="og:url" content="https://ricardoaquinoconsultoria-ship-it.github.io/PrestaBill/" />
-<meta property="og:type" content="website" />
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+
 <style>
 /* 1. Resetear el Box Sizing para mejor consistencia */
 *, *::before, *::after {
-  box-sizing: border-sizing;
+  box-sizing: border-box; /* Corregido a border-box */
 }
 
 body { 
   margin:0; 
-  font-family: Arial, sans-serif; 
-  background:#f4f4f4; 
+  /* MEJORA 1: Tipografía y color de fondo más suaves */
+  font-family: 'Roboto', sans-serif; 
+  background:#f9f9f9; /* Fondo más claro */
+  color: #333;
 }
 
 /* HEADER - FIJO AL 100% */
 header { 
-  background:#4a6d4a; 
+  background:#1c5d99; /* Color más profesional (Azul Oscuro) */
   color:white; 
   padding:15px; 
-  font-size:22px; 
+  font-size:24px; 
+  font-weight: 700;
   display:flex; 
   align-items:center; 
   z-index:1000; 
@@ -36,102 +37,140 @@ header {
   top:0; 
   width:100%; 
   left: 0;
+  /* MEJORA 2: Sombra en el Header */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-#menu-toggle { cursor:pointer; margin-right:15px; font-size:22px; }
+#menu-toggle { 
+  cursor:pointer; 
+  margin-right:15px; 
+  font-size:28px; 
+  transition: opacity 0.2s;
+}
+#menu-toggle:hover { opacity: 0.8; }
 
-/* SIDEBAR (MODIFICADO PARA FULLSCREEN) */
+/* SIDEBAR */
 aside {
   width:260px;
-  background:#4a6d4a; 
+  background:#2c3e50; /* Color Sidebar (Gris Oscuro) */
   color:white;
-  padding:10px; 
+  padding:10px 0; /* Padding ajustado */
   position:fixed;
-  /* CAMBIO CLAVE: Empezar en top: 0 para cubrir el header */
   top:0; 
   left:-260px; 
-  /* CAMBIO CLAVE: Usar 100vh para cubrir el viewport completo */
   height:100vh; 
   transition: left 0.3s ease;
-  z-index:1001; /* Z-index mayor que el header (1000) */
+  z-index:1001; 
   box-sizing: border-box;
   overflow-y: auto; 
+  /* MEJORA 3: Sombra para el Sidebar abierto */
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
 }
 aside.open { left:0; }
 
 /* NAV BUTTONS */
 .nav-btn { 
-  width:100%; 
-  background:#2979b9; 
-  padding:10px; 
+  width:calc(100% - 20px); 
+  background:transparent; 
+  padding:12px 15px; /* Más padding */
   border:none; 
   color:white; 
-  margin-bottom:8px; 
+  margin:5px 10px; 
   cursor:pointer; 
   text-align:left; 
   border-radius:6px; 
   font-size:16px; 
-  transition: background 0.2s;
+  transition: background 0.3s;
+  font-weight: 400;
 }
-.nav-btn:hover { background:#1d6fb8; } 
+.nav-btn:hover { 
+  background:#34495e; /* Hover más claro */
+} 
+/* MEJORA 4: Estilo para el botón activo (opcional) */
+/* .nav-btn.active { background:#1c5d99; } */
 
 /* MAIN */
 main {
-  padding: 80px 20px 20px 20px; 
+  padding: 90px 20px 20px 20px; /* Ajuste para header de 60px */
   margin-left: 0; 
   transition: margin-left 0.3s ease;
   width: auto; 
 }
-main.shifted { 
-  /* En la versión móvil (que es lo que simula el drawer), no queremos el margin-left */
-  /* Si el ancho de la pantalla es pequeño, este margin-left: 260px se ignorará */
-  margin-left: 0; 
-}
 
-/* TARJETAS - Compactado a 15px de padding */
+/* TARJETAS - Se agrega sombra moderna */
 .card { 
   background:white; 
-  padding:15px; 
+  padding:20px; /* Más padding */
   border-radius:10px; 
   margin-bottom:20px; 
   min-height: 100px;
-  border: 1px solid #ddd; 
+  border: 1px solid #e0e0e0; /* Borde más suave */
+  /* MEJORA 5: Sombra suave */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); 
+  /* MEJORA 8: Transición para feedback visual de tarjeta */
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; 
+}
+/* MEJORA 8: Efecto de hover */
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* CORRECCIÓN CLAVE: APLICA FLEX:1 A LAS CARDS DENTRO DEL CONTENEDOR FLEX DEL DASHBOARD */
+
+/* DASHBOARD CARDS CONTAINER (para la distribución) */
+.dashboard-cards-container {
+    display:flex; 
+    gap:20px; 
+    flex-wrap:wrap; 
+    margin-bottom:20px;
+}
 .dashboard-cards-container .card {
     flex: 1 1 200px;
     margin-bottom: 0; 
 }
 
-/* CONTENEDOR DE CLIENTES */
+/* CONTENEDOR DE CLIENTES Y PRESTAMOS */
 #clients-list, #loans-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Min-width un poco más grande */
   gap: 20px; 
 }
 
 /* NUEVOS ESTILOS PARA FORMULARIO */
 .form-input {
   width: 100%; 
-  padding: 10px;
-  border-radius: 5px;
+  padding: 12px; /* Más padding */
+  border-radius: 6px;
   border: 1px solid #ccc;
   font-size: 16px;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
+/* MEJORA 6: Input Focus State */
+.form-input:focus {
+    border-color: #1c5d99;
+    outline: none;
+    box-shadow: 0 0 5px rgba(28, 93, 153, 0.4);
+}
+
 /* BOTONES DE ACCIÓN */
 .action-btn {
   background:#1c5d99; 
   color:white; 
-  padding:10px; 
+  padding:12px; 
   border:none; 
-  border-radius:5px; 
+  border-radius:6px; 
   cursor:pointer;
   width: 100%; 
   font-size: 16px;
-  transition: background 0.2s;
+  font-weight: bold;
+  transition: background 0.3s, transform 0.1s;
 }
-.action-btn:hover { background:#1d6fb8; }
+.action-btn:hover { 
+    background:#174a7a; 
+}
+.action-btn:active {
+    transform: scale(0.98);
+}
 
 /* Ajustes para tablas */
 table {
@@ -140,42 +179,42 @@ table {
 }
 
 table td, table th {
-    padding: 10px 8px; 
-    border: 1px solid #eee; 
+    padding: 12px 10px; /* Más padding */
+    border: none; /* Quitamos el borde de celdas para usar solo el de fila */
     text-align: left;
 }
 
 table th {
-    background: #f0f0f0; 
-    font-weight: bold;
+    background: #e6e6e6; 
+    font-weight: 700;
+    color: #333;
 }
+
+/* MEJORA 7: Estilo Zebra Striping para Tablas */
+.neutral-row-even {
+    background: #fff !important; 
+}
+.neutral-row-odd {
+    background: #f0f4f7 !important; /* Color muy suave */
+}
+/* Las filas impares tienen un color suave */
+
 
 /* Estilo específico para la columna con el texto más propenso a desbordarse */
 .client-loan-cell {
-    max-width: 200px; 
+    max-width: 250px; 
     white-space: normal; 
     word-break: break-word; 
     overflow-wrap: break-word; 
 }
 
-/* === ESTILOS NEUTROS PARA PESTAÑA REPORTES === */
-
-/* Encabezado de la tabla de mora y ranking */
+/* === ESTILOS DE REPORTES/MORA === */
 .neutral-header {
-    background: #f0f0f0 !important; 
-    color: #333 !important; 
+    background: #1c5d99 !important; 
+    color: white !important; 
     font-weight: bold;
 }
 
-/* Filas de la tabla de mora y ranking */
-.neutral-row-even {
-    background: #fff !important; 
-}
-.neutral-row-odd {
-    background: #f9f9f9 !important; 
-}
-
-/* Texto de alerta para meses en mora */
 .mora-alert-text {
     font-weight: bold;
     color: #e74c3c; 
@@ -183,38 +222,80 @@ table th {
 
 /* Quitar bordes de color de las tarjetas en reportes */
 .card-no-border-left {
-    border-left: 1px solid #ddd !important; 
+    border-left: 1px solid #e0e0e0 !important; 
 }
 
 /* Contenedor del detalle de préstamos en mora - Darle borde y fondo neutro */
 #mora-loans-detail-container {
-    border: 1px solid #ddd;
+    border: 1px solid #e0e0e0;
     background: white;
     padding: 15px;
     border-radius: 10px;
     margin-top: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-/* === FIN DE ESTILOS NEUTROS PARA PESTAÑA REPORTES === */
+/* MODAL DE VISUALIZACIÓN DE FACTURA (MEJORA 14) */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+.modal-content {
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    max-width: 90%;
+    max-height: 90%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 10px;
+}
+.modal-header h3 {
+    margin: 0;
+    color: #1c5d99;
+}
+.modal-close-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+#invoice-iframe {
+    width: 100%;
+    flex-grow: 1;
+    min-height: 500px; /* Altura mínima para asegurar visibilidad */
+    border: none;
+}
+.modal-download-btn {
+    margin-top: 10px;
+    background: #2ecc71;
+}
+
+/* === FIN DE ESTILOS DE REPORTES/MORA === */
 
 /* MEJORA RESPONSIVE: PARA VISTAS GRANDES (desktop), mantener el layout shifted */
 @media (min-width: 768px) {
-    main {
-        margin-left: 0; /* Mantener la posición base */
-    }
-    aside {
-        /* Siempre visible en desktop si la clase 'open' está activa */
-        left: -260px;
-    }
-    aside.open {
-        left: 0;
-    }
     main.shifted { 
         /* En desktop, aplicar el margen cuando el menú está abierto */
         margin-left: 260px; 
-    }
-    #menu-toggle {
-        display: block; /* Siempre visible para abrir/cerrar */
     }
 }
 </style>
@@ -222,22 +303,39 @@ table th {
 <body>
 
 <header id="app-header">
-  <span id="menu-toggle">☰</span>
+  <span id="menu-toggle" 
+        role="button" 
+        aria-controls="sidebar" 
+        aria-expanded="false" 
+        tabindex="0">☰</span>
   Presta Bill
 </header>
 
 <aside id="sidebar">
-  <button class="nav-btn" onclick="renderDashboard(); closeSidebar();">🏠 Inicio</button>
-  <button class="nav-btn" onclick="renderClients(); closeSidebar();">👥 Clientes</button>
-  <button class="nav-btn" onclick="renderLoans(); closeSidebar();">💵 Préstamos</button>
-  <button class="nav-btn" onclick="renderCobros(); closeSidebar();">💰 Cobros</button>
-  <button class="nav-btn" onclick="renderReports(); closeSidebar();">📊 Reportes</button>
-  <button class="nav-btn" onclick="renderCobrosHistory(); closeSidebar();">📜 Historial Transacciones</button>
-  <button class="nav-btn" onclick="renderSettings(); closeSidebar();">⚙️ Configuraciones</button>
-  <button class="nav-btn" onclick="renderMaintenance(); closeSidebar();">💾 Mantenimiento</button> 
+    <h3 style="padding:15px; margin:0; text-align:center; color:#fff; border-bottom:1px solid #34495e;">Menú Principal</h3>
+  <button class="nav-btn" type="button" onclick="renderDashboard(); closeSidebar();">🏠 Inicio</button>
+  <button class="nav-btn" type="button" onclick="renderClients(); closeSidebar();">👥 Clientes</button>
+  <button class="nav-btn" type="button" onclick="renderLoans(); closeSidebar();">💵 Préstamos</button>
+  <button class="nav-btn" type="button" onclick="renderCobros(); closeSidebar();">💰 Cobros</button>
+  <button class="nav-btn" type="button" onclick="renderReports(); closeSidebar();">📊 Reportes</button>
+  <button class="nav-btn" type="button" onclick="renderCobrosHistory(); closeSidebar();">📜 Historial Transacciones</button>
+  <button class="nav-btn" type="button" onclick="renderSettings(); closeSidebar();">⚙️ Configuraciones</button>
+  <button class="nav-btn" type="button" onclick="renderMaintenance(); closeSidebar();">💾 Mantenimiento</button> 
 </aside>
 
 <main id="main"></main>
+
+<div id="invoice-modal" class="modal-overlay" onclick="if(event.target.id === 'invoice-modal') closeInvoiceModal()">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modal-invoice-title">Factura de Cobro</h3>
+            <button class="modal-close-btn" onclick="closeInvoiceModal()">X Cerrar</button>
+        </div>
+        <iframe id="invoice-iframe" title="Visualización de Factura PDF"></iframe>
+        
+        <button id="modal-download-btn" class="action-btn modal-download-btn" onclick="downloadInvoice()">⬇️ Descargar PDF</button>
+    </div>
+</div>
 
 <script>
 // ===============================================
@@ -247,6 +345,9 @@ const DEFAULT_SETTINGS = {
     baseInterestRate: 20, // % para 3 meses
     currencySymbol: 'RD$' 
 };
+
+// Activar jsPDF en el scope
+const { jsPDF } = window.jspdf;
 
 const DB = { 
   get: k => JSON.parse(localStorage.getItem(k)||"[]"), 
@@ -275,73 +376,55 @@ const DB = {
 };
 const genId = () => "id"+Math.random().toString(36).substr(2,9);
 
-
-// ===============================================
-// LÓGICA DE INTERFAZ MEJORADA (Incluye Swipe) 📱
-// ===============================================
 const sidebar = document.getElementById("sidebar");
 const main = document.getElementById("main");
 const header = document.getElementById("app-header");
 const menuToggle = document.getElementById("menu-toggle");
 
-let touchStartX = 0; 
-const SWIPE_THRESHOLD = 50; 
-
-function openSidebar() {
-    sidebar.classList.add("open");
-    // Solo aplicar "shifted" si la pantalla es lo suficientemente grande (desktop view)
-    if (window.innerWidth >= 768) {
-       main.classList.add("shifted");
-    } else {
-       main.classList.remove("shifted"); 
-    }
+// MEJORA 9: Función de formato de moneda centralizada
+function formatCurrency(amount) {
+    const settings = DB.getSettings();
+    // Usar toFixed(2) para asegurar dos decimales y devolver el string con el símbolo.
+    return `${settings.currencySymbol} ${Number(amount).toFixed(2)}`;
 }
 
-function closeSidebar() {
-    sidebar.classList.remove("open");
-    main.classList.remove("shifted"); 
-}
 
-// 1. Manejar el click/tap en el botón del menú
+// ===============================================
+// LÓGICA DE INTERFAZ (AJUSTADA)
+// ===============================================
 menuToggle.onclick = () => {
-  if (sidebar.classList.contains("open")) {
-    closeSidebar();
+  const isOpening = !sidebar.classList.contains("open");
+  
+  sidebar.classList.toggle("open");
+  
+  // MEJORA 11: Actualizar atributos ARIA
+  menuToggle.setAttribute('aria-expanded', isOpening.toString());
+
+  if (window.innerWidth >= 768) {
+     main.classList.toggle("shifted");
   } else {
-    openSidebar();
+     main.classList.remove("shifted"); 
+  }
+  
+  // MEJORA 14: Enfocar el primer botón del sidebar al abrir
+  if (isOpening) {
+      const firstNavBtn = sidebar.querySelector('.nav-btn');
+      if (firstNavBtn) {
+          firstNavBtn.focus();
+      }
   }
 };
 
-// 2. Agregar lógica de SWIPE
-function handleTouchStart(event) {
-    if (event.touches.length === 1) {
-        touchStartX = event.touches[0].clientX;
-    }
-}
-
-function handleTouchEnd(event) {
-    if (event.changedTouches.length !== 1 || touchStartX === 0) return; 
-
-    const touchEndX = event.changedTouches[0].clientX;
-    const deltaX = touchEndX - touchStartX;
-
-    // --- LÓGICA DE APERTURA (Swipe a la derecha) ---
-    // Si se desliza a la DERECHA y el toque inicial fue cerca del borde izquierdo
-    if (deltaX > SWIPE_THRESHOLD && touchStartX < 50 && !sidebar.classList.contains("open")) {
-        openSidebar();
-    }
+function closeSidebar() {
+  if (sidebar.classList.contains("open")) {
+    sidebar.classList.remove("open");
+    menuToggle.setAttribute('aria-expanded', 'false'); // MEJORA 11
     
-    // --- LÓGICA DE CIERRE (Swipe a la izquierda) ---
-    // Si se desliza a la IZQUIERDA y el menú está abierto
-    if (deltaX < -SWIPE_THRESHOLD && sidebar.classList.contains("open")) {
-        closeSidebar();
+    if (window.innerWidth >= 768) {
+        main.classList.remove("shifted"); 
     }
-
-    touchStartX = 0;
+  }
 }
-
-// 3. Asignar los listeners al cuerpo para detección de borde
-document.body.addEventListener('touchstart', handleTouchStart, false);
-document.body.addEventListener('touchend', handleTouchEnd, false);
 
 // ===============================================
 // VISTA: DASHBOARD
@@ -366,15 +449,15 @@ function calculateLoanPortfolioSummary() {
         // 3. Saldo pendiente
         const remainingBalance = totalPagar - totalPaidAmount;
         
-        if (remainingBalance > 0) {
+        if (remainingBalance > 0.01) { // Pequeño margen
             netBalancePending += remainingBalance;
         }
 
         // 4. Calcular Mora
         const risk = calculateLoanRisk(loan);
         if (risk.monthsBehind > 0) {
-            // Estimación simple del capital en mora
-            moraAmount += remainingBalance; 
+            // Usamos el total adeudado por cuotas vencidas y no pagadas
+            moraAmount += risk.totalDue; 
         }
     }
 
@@ -385,7 +468,6 @@ function calculateLoanPortfolioSummary() {
 function renderDashboard(){
   const clients = DB.get("clients").length;
   const cobros = DB.getInitialCobros(); 
-  const settings = DB.getSettings();
   
   // 1. CÁLCULO DE GANANCIAS
   const totalGanancias = cobros.reduce((a,b)=> a+Number(b.amount),0); 
@@ -399,28 +481,28 @@ function renderDashboard(){
 
   main.innerHTML = `
     <h2>Resumen de Préstamos 📈</h2>
-    <div class="dashboard-cards-container" style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:20px;">
+    <div class="dashboard-cards-container">
         
-        <div class="card" style="flex:1 1 200px;">
+        <div class="card" style="border-left: 5px solid #2980b9;">
             <h3>Clientes Totales</h3>
             <p style="font-size:36px; font-weight:bold;">${clients}</p>
             <p style="margin:0; font-size:0.9em; color:#888;">Total de personas registradas.</p>
         </div>
         
-        <div class="card" style="flex:1 1 200px; border-left: 5px solid #2ecc71;">
+        <div class="card" style="border-left: 5px solid #2ecc71;">
             <h3>Ganancias Recibidas</h3>
-            <p style="font-size:36px; font-weight:bold;">${settings.currencySymbol} ${totalGanancias.toFixed(2)}</p>
+            <p style="font-size:36px; font-weight:bold;">${formatCurrency(totalGanancias)}</p>
             <p style="margin:0; font-size:0.9em; color:#888;">Monto total de cobros históricos.</p>
         </div>
 
-        <div class="card" style="flex:1 1 200px; border-left: 5px solid #1c5d99;">
+        <div class="card" style="border-left: 5px solid #1c5d99;">
             <h3>Potencial de Ingreso</h3>
-            <p style="font-size:36px; font-weight:bold;">${settings.currencySymbol} ${netBalancePending.toFixed(2)}</p>
+            <p style="font-size:36px; font-weight:bold;">${formatCurrency(netBalancePending)}</p>
             <p style="margin:0; font-size:0.9em; color:#888;">Total (Ppal + Interés) por cobrar.</p>
         </div>
         
-        <div class="card" style="flex:1 1 200px; border-left: 5px solid ${loansInMora.length > 0 ? '#e74c3c' : '#2ecc71'};">
-            <h3>Clientes en Mora ⚠️</h3>
+        <div class="card" style="border-left: 5px solid ${loansInMora.length > 0 ? '#e74c3c' : '#2ecc71'};">
+            <h3>Préstamos en Mora ⚠️</h3>
             <p style="font-size:36px; font-weight:bold; color: ${loansInMora.length > 0 ? '#e74c3c' : '#2ecc71'};">
                 ${loansInMora.length}
             </p>
@@ -430,7 +512,9 @@ function renderDashboard(){
 
     <h3>Distribución de Capital Prestado</h3>
     <div class="card">
-        <canvas id="loanDistributionChart"></canvas>
+        <div style="max-height: 400px;"> 
+            <canvas id="loanDistributionChart"></canvas>
+        </div>
     </div>
   `;
   
@@ -472,6 +556,7 @@ function renderLoanDistributionChart() {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false, // Permitir que el contenedor maneje la altura
             plugins: {
                 legend: {
                     position: 'top',
@@ -503,21 +588,25 @@ function calculateTotalLoanAmount(clientId) {
 // ===============================================
 function renderClients(){
   main.innerHTML = `
-    <h2>Clientes</h2>
+    <h2>Clientes 👥</h2>
     <div style="margin-bottom:20px;">
         <input id="client-search" placeholder="Buscar por Nombre o Cédula..." class="form-input" onkeyup="refreshClientsList(this.value)">
     </div>
     
-    <div style="background: #e6e6e6; padding: 15px; border-radius: 10px; margin-bottom:20px;">
+    <div class="card" style="background: #f0f7ff; border: 1px solid #d0e8ff;">
         <h3 style="margin-top:0;">Agregar Nuevo Cliente</h3>
         <div style="display:grid; gap:10px;">
-            <input id="client-name" placeholder="Nombre" class="form-input">
-            <input id="client-cedula" placeholder="Cédula" class="form-input">
+            <input id="client-name" placeholder="Nombre (Requerido)" class="form-input">
+            <input type="number" id="client-cedula" placeholder="Cédula (Requerido)" class="form-input">
             <input id="client-address" placeholder="Dirección Residencial" class="form-input">
-            <input id="client-phone-main" placeholder="Teléfono Principal" class="form-input"> 
-            <input id="client-phone-mobile" placeholder="Celular" class="form-input">
+            <input type="tel" id="client-phone-main" placeholder="Teléfono Principal" class="form-input"> 
+            <input type="tel" id="client-phone-mobile" placeholder="Celular" class="form-input">
             <button class="action-btn" onclick="addClient()">Agregar Cliente</button>
         </div>
+    </div>
+    
+    <div id="no-clients-warning" style="display:none; text-align:center; padding:20px; border-radius:10px; background:#fff3cd; border:1px solid #ffeeba; color:#856404; margin-bottom:20px;">
+        ⚠️ **No hay clientes registrados.** Por favor, añada uno usando el formulario de arriba.
     </div>
 
     <div id="clients-list"></div>
@@ -558,7 +647,7 @@ function addClient(){
 function refreshClientsList(searchTerm = ''){
   let list = DB.get("clients");
   const box = document.getElementById("clients-list");
-  const settings = DB.getSettings();
+  const warningBox = document.getElementById("no-clients-warning");
   
   if(searchTerm.trim()){
     const term = searchTerm.toLowerCase().trim();
@@ -569,8 +658,15 @@ function refreshClientsList(searchTerm = ''){
   }
 
   if(list.length===0){ 
-    box.innerHTML=`<p style="text-align:center; padding:20px;">${searchTerm ? 'No se encontraron clientes que coincidan con la búsqueda.' : 'No hay clientes registrados.'}</p>`; 
+    box.innerHTML=`<p style="text-align:center; padding:20px;">${searchTerm ? 'No se encontraron clientes que coincidan con la búsqueda.' : ''}</p>`; 
+    if (!searchTerm && warningBox) {
+        warningBox.style.display = 'block'; // Mostrar la advertencia si no hay clientes y no hay búsqueda
+    } else if (warningBox) {
+        warningBox.style.display = 'none';
+    }
     return; 
+  } else if (warningBox) {
+      warningBox.style.display = 'none';
   }
   
   box.innerHTML = list.map(c=>{
@@ -580,15 +676,15 @@ function refreshClientsList(searchTerm = ''){
     return `
       <div class="card" id="client-card-${c.id}">
           <div id="client-view-${c.id}">
-              <b>${c.name}</b><br>
+              <h4 style="margin:0 0 5px 0; color:#1c5d99;">${c.name}</h4>
               Cédula: ${c.cedula || 'N/A'}<br>
               Dir: ${c.address || 'N/A'}<br>
-              Total Capital Prestado: <b style="color:#1c5d99;">${settings.currencySymbol}${totalPrestado.toFixed(2)}</b><br>
+              Total Capital Prestado: <b style="color:#2ecc71;">${formatCurrency(totalPrestado)}</b><br>
               Tel: ${c.phoneMain || 'N/A'} / Cel: ${c.phoneMobile || 'N/A'}<br><br>
               
               <div style="display:flex; gap:10px;">
-                  <button class="action-btn" style="flex:1; background:#f39c12;" onclick="prepareEdit('${c.id}')">Editar</button>
-                  <button class="action-btn" style="flex:1; background:#e74c3c;" onclick="deleteClient('${c.id}')">Eliminar</button>
+                  <button class="action-btn" style="flex:1; background:#f39c12;" onclick="prepareEdit('${c.id}')">✏️ Editar</button>
+                  <button class="action-btn" style="flex:1; background:#e74c3c;" onclick="deleteClient('${c.id}')">🗑️ Eliminar</button>
               </div>
           </div>
           <div id="client-edit-${c.id}" style="display:none;">
@@ -598,9 +694,7 @@ function refreshClientsList(searchTerm = ''){
   }).join("");
 }
 
-// ===============================================
-// FUNCIÓN: ELIMINACIÓN EN CASCADA (CLIENTE)
-// ===============================================
+// MEJORA 12: FUNCIÓN: ELIMINACIÓN EN CASCADA (CLIENTE)
 function deleteClient(id) {
     if (!confirm("ADVERTENCIA: ¿Está seguro de que desea eliminar a este cliente? Esto eliminará PERMANENTEMENTE todos sus préstamos y el historial de cobros asociados.")) return;
 
@@ -638,7 +732,6 @@ function deleteClient(id) {
 
 function prepareEdit(id) {
     const client = DB.get("clients").find(c => c.id === id);
-    const settings = DB.getSettings();
     if (!client) return;
 
     // Calcular el monto total prestado para MOSTRARLO (no editar)
@@ -650,19 +743,19 @@ function prepareEdit(id) {
 
     editBox.innerHTML = `
         <input id="edit-name-${id}" value="${client.name}" placeholder="Nombre" class="form-input" style="margin-bottom:5px;">
-        <input id="edit-cedula-${id}" value="${client.cedula}" placeholder="Cédula" class="form-input" style="margin-bottom:5px;">
+        <input type="number" id="edit-cedula-${id}" value="${client.cedula}" placeholder="Cédula" class="form-input" style="margin-bottom:5px;">
         <input id="edit-address-${id}" value="${client.address || ''}" placeholder="Dirección Residencial" class="form-input" style="margin-bottom:5px;">
-        <input id="edit-phone-main-${id}" value="${client.phoneMain || ''}" placeholder="Teléfono Principal" class="form-input" style="margin-bottom:5px;">
-        <input id="edit-phone-mobile-${id}" value="${client.phoneMobile || ''}" placeholder="Celular" class="form-input" style="margin-bottom:10px;">
+        <input type="tel" id="edit-phone-main-${id}" value="${client.phoneMain || ''}" placeholder="Teléfono Principal" class="form-input" style="margin-bottom:5px;">
+        <input type="tel" id="edit-phone-mobile-${id}" value="${client.phoneMobile || ''}" placeholder="Celular" class="form-input" style="margin-bottom:10px;">
         
         <p style="margin: 0 0 10px 0; padding:10px; background:#f0f0f0; border-radius:5px;">
-            **Capital Total Prestado:** <span style="font-weight:bold; color:#1c5d99;">${settings.currencySymbol} ${totalPrestado.toFixed(2)}</span> 
+            **Capital Total Prestado:** <span style="font-weight:bold; color:#1c5d99;">${formatCurrency(totalPrestado)}</span> 
             (No editable aquí. Se gestiona en "Préstamos")
         </p>
 
         <div style="display:flex; gap:10px;">
-            <button class="action-btn" style="flex:1; background:#2ecc71;" onclick="saveClient('${id}')">Guardar Cambios</button>
-            <button class="action-btn" style="flex:1; background:#95a5a6;" onclick="cancelEdit('${id}')">Cancelar</button>
+            <button class="action-btn" style="flex:1; background:#2ecc71;" onclick="saveClient('${id}')">💾 Guardar Cambios</button>
+            <button class="action-btn" style="flex:1; background:#95a5a6;" onclick="cancelEdit('${id}')">❌ Cancelar</button>
         </div>
     `;
 }
@@ -708,28 +801,28 @@ function saveClient(id) {
 function renderLoans() {
     const settings = DB.getSettings();
   main.innerHTML = `
-    <h2>Préstamos</h2>
+    <h2>Préstamos 💵</h2>
     
-    <div class="card" style="text-align:left;">
+    <div class="card" style="text-align:left; background: #f0f7ff; border: 1px solid #d0e8ff;">
         <h3>Registrar Nuevo Préstamo (Cuotas Fijas)</h3>
         
+        <label for="loan-client" style="display:block; font-weight:bold; margin-bottom:5px;">Cliente:</label>
         <select id="loan-client" class="form-input" style="margin-bottom:15px;">
             <option value="">-- Seleccione un Cliente --</option>
         </select>
         
-        <label>Monto del préstamo (${settings.currencySymbol}): 
-            <input type="number" id="loan-amount" placeholder="Monto Principal (${settings.currencySymbol})" class="form-input" value="10000" min="1" style="margin-bottom:10px;">
-        </label>
-        <label>Porcentaje de interés base (%) - Para 3 meses: 
-            <input type="number" id="loan-interest-base" placeholder="Tasa Base (%)" class="form-input" value="${settings.baseInterestRate}" min="0" step="0.1" style="margin-bottom:10px;">
-        </label>
-        <label>Plazo (meses): 
-            <input type="number" id="loan-term" placeholder="Plazo (Meses)" class="form-input" value="3" min="1" style="margin-bottom:10px;">
-        </label>
+        <label for="loan-amount" style="display:block; font-weight:bold; margin-bottom:5px;">Monto del préstamo (${settings.currencySymbol}):</label>
+        <input type="number" id="loan-amount" placeholder="Monto Principal (${settings.currencySymbol})" class="form-input" value="10000" min="1" style="margin-bottom:15px;">
         
-        <button class="action-btn" onclick="calculateAndSaveLoan()">Calcular y Registrar Préstamo</button>
+        <label for="loan-interest-base" style="display:block; font-weight:bold; margin-bottom:5px;">Porcentaje de interés base (%) - Para 3 meses:</label>
+        <input type="number" id="loan-interest-base" placeholder="Tasa Base (%)" class="form-input" value="${settings.baseInterestRate}" min="0" step="0.1" style="margin-bottom:15px;">
         
-        <div id="calculator-summary" style="margin-top: 15px;"></div>
+        <label for="loan-term" style="display:block; font-weight:bold; margin-bottom:5px;">Plazo (meses):</label>
+        <input type="number" id="loan-term" placeholder="Plazo (Meses)" class="form-input" value="3" min="1" style="margin-bottom:15px;">
+        
+        <button class="action-btn" onclick="calculateAndSaveLoan()">➕ Calcular y Registrar Préstamo</button>
+        
+        <div id="calculator-summary" style="margin-top: 15px; padding: 15px; border-radius: 8px; background: #fff; border: 1px dashed #ccc;"></div>
     </div>
     
     <div style="margin-top:20px;">
@@ -772,8 +865,7 @@ function calculateAndSaveLoan() {
     // Obtener la tasa de interés base del formulario (ya precargada con settings.baseInterestRate)
     const interesBase = Number(document.getElementById("loan-interest-base").value); 
     const n = Number(document.getElementById("loan-term").value); // Plazo (meses)
-    const settings = DB.getSettings();
-
+    
     if (!clientId) return alert("Por favor, seleccione un cliente.");
     if (P <= 0 || interesBase < 0 || n <= 0) {
         return alert("Por favor, complete todos los campos de la calculadora correctamente con valores positivos.");
@@ -790,11 +882,12 @@ function calculateAndSaveLoan() {
 
     // Mostrar el resumen del cálculo
     let resultadoHTML = `
+        <h4 style="margin-top:0;">Resumen del Préstamo</h4>
         <p style="border-top: 1px solid #ccc; padding-top: 10px;">
-            <strong>Monto Préstamo:</strong> ${settings.currencySymbol} ${P.toFixed(2)}<br>
-            <strong>Interés Total:</strong> ${settings.currencySymbol} ${totalInteres.toFixed(2)}<br>
-            <strong>Total a Pagar:</strong> ${settings.currencySymbol} ${totalPagar.toFixed(2)}<br>
-            <strong style="color:#1c5d99;">Cuota Mensual Fija: ${settings.currencySymbol} ${cuotaMensual.toFixed(2)}</strong>
+            <strong>Monto Préstamo:</strong> ${formatCurrency(P)}<br>
+            <strong>Interés Total:</strong> ${formatCurrency(totalInteres)}<br>
+            <strong>Total a Pagar:</strong> ${formatCurrency(totalPagar)}<br>
+            <strong style="color:#1c5d99; font-size: 1.2em;">Cuota Mensual Fija: ${formatCurrency(cuotaMensual)}</strong>
         </p>
     `;
     document.getElementById('calculator-summary').innerHTML = resultadoHTML;
@@ -804,7 +897,7 @@ function calculateAndSaveLoan() {
         id: genId(),
         clientId: clientId,
         clientName: client.name,
-        amount: P,
+        amount: P.toFixed(2), // Guardar como string con 2 decimales
         interestRateBase: interesBase,
         termMonths: n,
         monthlyPayment: cuotaMensual.toFixed(2),
@@ -820,9 +913,10 @@ function calculateAndSaveLoan() {
     allLoans.push(newLoan);
     DB.set("loans", allLoans);
 
-    alert(`Préstamo registrado. Cuota Mensual: ${settings.currencySymbol} ${newLoan.monthlyPayment}`);
+    alert(`Préstamo registrado. Cuota Mensual: ${formatCurrency(newLoan.monthlyPayment)}`);
     
     // Limpiar formulario (manteniendo los valores por defecto)
+    const settings = DB.getSettings();
     document.getElementById("loan-amount").value = '10000';
     document.getElementById("loan-interest-base").value = settings.baseInterestRate;
     document.getElementById("loan-term").value = '3';
@@ -833,9 +927,7 @@ function calculateAndSaveLoan() {
 }
 
 
-// ===============================================
-// FUNCIÓN DE ELIMINACIÓN DE PRÉSTAMO INDIVIDUAL (CASCADA)
-// ===============================================
+// MEJORA 12: FUNCIÓN DE ELIMINACIÓN DE PRÉSTAMO INDIVIDUAL (CASCADA)
 function deleteLoan(id) {
     if (!confirm("ADVERTENCIA: ¿Está seguro de que desea eliminar este PRÉSTAMO? Esto eliminará PERMANENTEMENTE este préstamo y todos los cobros asociados a él.")) return;
 
@@ -860,19 +952,18 @@ function deleteLoan(id) {
 }
 // ===============================================
 
-// ===============================================
-// FUNCIÓN DE CÁLCULO DE RIESGO DE MORA (MEJORADA)
-// ===============================================
+// MEJORA 13: FUNCIÓN DE CÁLCULO DE RIESGO DE MORA (MEJORADA Y MÁS ROBUSTA)
 function calculateLoanRisk(loan) {
     const today = new Date();
-    const startDate = new Date(loan.startDate);
+    // Normalizar la fecha de inicio para evitar problemas de zona horaria al calcular los meses
+    const startDate = new Date(loan.startDate + 'T00:00:00'); 
     const cuotaMensual = Number(loan.monthlyPayment);
     const paymentsMade = Number(loan.paymentsMade);
     const termMonths = Number(loan.termMonths);
 
     // Si está pagado, no hay mora
     if (loan.status === 'Pagado') {
-        return { monthsBehind: 0, totalDue: 0, nextDueDate: null };
+        return { paymentsDue: termMonths, paymentsMade: termMonths, monthsBehind: 0, totalDue: 0, nextDueDate: null };
     }
 
     // --- CÁLCULO ROBUSTO DE CUOTAS VENCIDAS ---
@@ -885,8 +976,19 @@ function calculateLoanRisk(loan) {
         let dueDate = new Date(startDate);
         dueDate.setMonth(startDate.getMonth() + i);
 
+        // Ajuste para mantener el día de inicio
+        if (startDate.getDate() !== dueDate.getDate()) {
+            // Ajustar al último día del mes si es necesario
+            dueDate.setDate(0); 
+            dueDate.setDate(startDate.getDate()); 
+            // Esto es solo un ajuste para mantener la lógica de "día de pago" consistente
+        }
+
         // Si la fecha de vencimiento es HOY o en el PASADO (consideramos HOY vencido)
-        if (today >= dueDate) {
+        const dateOnlyToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const dateOnlyDue = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
+        
+        if (dateOnlyToday >= dateOnlyDue) {
             paymentsDue = i; // La cuota 'i' ha vencido
         } else {
             // Si encontramos una cuota que vence en el futuro, esa es la próxima fecha.
@@ -899,7 +1001,13 @@ function calculateLoanRisk(loan) {
     let monthsBehind = Math.max(0, paymentsDue - paymentsMade);
     
     // 2. Calcular el monto total adeudado (cuotas atrasadas)
+    // El monto adeudado es el monto de las cuotas vencidas y no pagadas
     let totalDue = cuotaMensual * monthsBehind;
+
+    // Si paymentsDue alcanzó el total del plazo pero paymentsMade es menor, el nextDueDate es nulo (vencimiento expirado)
+    if (paymentsDue === termMonths && paymentsMade < termMonths) {
+        nextDueDate = null;
+    }
 
     return {
         paymentsDue, // Cuotas que deberían haberse pagado hasta ahora (máx. termMonths)
@@ -914,7 +1022,6 @@ function calculateLoanRisk(loan) {
 function refreshLoanList() {
     const loans = DB.get("loans");
     const box = document.getElementById("loans-list");
-    const settings = DB.getSettings();
     
     if (loans.length === 0) {
         box.innerHTML = '<p style="text-align:center;">No hay préstamos activos registrados.</p>';
@@ -934,7 +1041,7 @@ function refreshLoanList() {
         if (l.status === 'Pagado') {
             nextDueText = 'Préstamo saldado.';
         } else if (risk.monthsBehind > 0) {
-            nextDueText = `<span style="color:red;">¡En Mora!</span>`;
+            nextDueText = `<span style="color:red; font-weight:bold;">¡En Mora!</span>`;
         } else if (risk.nextDueDate) {
              nextDueText = risk.nextDueDate.split('-').reverse().join('/'); // Formato DD/MM/AAAA
         } else {
@@ -945,17 +1052,17 @@ function refreshLoanList() {
         return `
             <div class="card" style="border-left: 5px solid ${statusColor};">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                    <h4 style="margin:0;">${l.clientName}</h4>
-                    <span style="background:${statusColor}; color:white; padding: 5px 10px; border-radius:5px; font-size:0.9em;">${statusText}</span>
+                    <h4 style="margin:0; color:#1c5d99;">${l.clientName}</h4>
+                    <span style="background:${statusColor}; color:white; padding: 5px 10px; border-radius:5px; font-size:0.9em; font-weight:bold;">${statusText}</span>
                 </div>
                 <hr style="border: 0; height: 1px; background: #eee; margin: 10px 0;">
                 <p style="margin: 5px 0; font-size:1.1em;">
-                    Monto Principal: <b>${settings.currencySymbol} ${Number(l.amount).toFixed(2)}</b><br>
-                    Cuota Mensual: <b>${settings.currencySymbol} ${Number(l.monthlyPayment).toFixed(2)}</b><br>
+                    Monto Principal: <b>${formatCurrency(l.amount)}</b><br>
+                    Cuota Mensual: <b>${formatCurrency(l.monthlyPayment)}</b><br>
                     Próximo Vencimiento: <b>${nextDueText}</b>
                 </p>
                 <p style="margin: 5px 0;">
-                    Pagado: ${settings.currencySymbol} ${Number(l.totalPaidAmount).toFixed(2)} / Total: ${settings.currencySymbol} ${totalPagar.toFixed(2)} 
+                    Pagado: ${formatCurrency(l.totalPaidAmount)} / Total: ${formatCurrency(totalPagar)} 
                     (${l.paymentsMade}/${l.termMonths} cuotas)
                 </p>
                 
@@ -964,8 +1071,8 @@ function refreshLoanList() {
                 </div>
                 
                 <div style="display:flex; gap:10px; margin-top:10px;">
-                    <button class="action-btn" style="flex:1; background:#1c5d99;" onclick="renderCobros('${l.id}')">Registrar Cobro</button>
-                    <button class="action-btn" style="flex:1; background:#e74c3c;" onclick="deleteLoan('${l.id}')">Eliminar</button>
+                    <button class="action-btn" style="flex:1; background:#1c5d99;" onclick="renderCobros('${l.id}')">💰 Registrar Cobro</button>
+                    <button class="action-btn" style="flex:1; background:#e74c3c;" onclick="deleteLoan('${l.id}')">🗑️ Eliminar</button>
                 </div>
             </div>
         `;
@@ -980,25 +1087,40 @@ function refreshLoanList() {
 function renderCobros(loanIdToSelect = null) {
     const settings = DB.getSettings();
     main.innerHTML = `
-        <h2>Registro de Cobros</h2>
+        <h2>Registro de Cobros 💰</h2>
         
-        <div class="card" style="text-align:left;">
+        <div class="card" style="text-align:left; background: #f0f7ff; border: 1px solid #d0e8ff;">
             <h3>Registrar Pago a Préstamo</h3>
             
+            <label for="payment-loan-id" style="display:block; font-weight:bold; margin-bottom:5px;">Seleccionar Préstamo:</label>
             <select id="payment-loan-id" class="form-input" style="margin-bottom:15px;" onchange="updatePaymentDetails()">
                 <option value="">-- Seleccione un Préstamo --</option>
             </select>
 
-            <div id="loan-summary-payment" style="margin-bottom:15px; background:#f9f9f9; padding:10px; border-radius:5px; border:1px solid #eee;">
+            <div id="loan-summary-payment" style="margin-bottom:15px; background:#fff; padding:15px; border-radius:8px; border:1px solid #eee;">
                 Seleccione un préstamo para ver el resumen de pago.
             </div>
 
-            <label>Monto del Pago (${settings.currencySymbol}):
-                <input type="number" id="payment-amount" placeholder="Monto a Cobrar (${settings.currencySymbol})" class="form-input" min="0.01" step="0.01" style="margin-bottom:10px;">
-            </label>
+            <label for="payment-amount" style="display:block; font-weight:bold; margin-bottom:5px;">Monto del Pago (${settings.currencySymbol}):</label>
+            <input type="number" id="payment-amount" placeholder="Monto a Cobrar (${settings.currencySymbol})" class="form-input" min="0.01" step="0.01" style="margin-bottom:15px;">
+            
 
-            <button class="action-btn" onclick="registerPayment()">Registrar Cobro</button>
+            <button class="action-btn" onclick="registerPayment()">✅ Registrar Cobro</button>
         </div>
+
+        <div class="card" style="margin-top: 20px; background: #ffe0f0; border: 1px solid #f0cccc;">
+             <h3>Generar Factura Manual (MEJORA 14)</h3>
+             <p>Seleccione un cobro del historial para generar o ver la factura retroactivamente.</p>
+             <label for="invoice-cobro-id" style="display:block; font-weight:bold; margin-bottom:5px;">Seleccionar Cobro:</label>
+             <select id="invoice-cobro-id" class="form-input" style="margin-bottom:15px;">
+                <option value="">-- Seleccione un Cobro del Historial --</option>
+             </select>
+             <div style="display:flex; gap:10px;">
+                <button class="action-btn" style="flex:1; background:#8e44ad;" onclick="generateInvoiceFromSelect(true)">👁️ Ver Factura PDF</button>
+                <button class="action-btn" style="flex:1; background:#2ecc71;" onclick="generateInvoiceFromSelect(false)">⬇️ Descargar PDF</button>
+             </div>
+        </div>
+
 
         <div style="margin-top:20px;">
             <h3>Pagos Pendientes y en Mora</h3>
@@ -1007,6 +1129,7 @@ function renderCobros(loanIdToSelect = null) {
     `;
 
     populateLoanSelect(loanIdToSelect);
+    populateCobroSelectForInvoice(); 
     refreshPendingPayments();
 }
 
@@ -1022,7 +1145,7 @@ function populateLoanSelect(loanIdToSelect) {
 
         const option = document.createElement('option');
         option.value = l.id;
-        option.textContent = `${l.clientName} (Resta: ${DB.getSettings().currencySymbol} ${remaining.toFixed(2)})`;
+        option.textContent = `${l.clientName} (Resta: ${formatCurrency(remaining)})`;
         select.appendChild(option);
     });
     
@@ -1032,11 +1155,42 @@ function populateLoanSelect(loanIdToSelect) {
     }
 }
 
+// NUEVA FUNCIÓN PARA POBLAR SELECT DE COBROS EN FACTURA
+function populateCobroSelectForInvoice() {
+    const allCobros = DB.getInitialCobros().sort((a, b) => new Date(b.fullDateTime) - new Date(a.fullDateTime)); // El más reciente primero
+    const select = document.getElementById("invoice-cobro-id");
+    
+    if (!select) return; // Salir si el select no existe (ej: estamos en otra vista)
+
+    select.innerHTML = '<option value="">-- Seleccione un Cobro del Historial --</option>'; 
+    
+    allCobros.slice(0, 100).forEach(c => { // Limitar a 100 para no sobrecargar
+        const option = document.createElement('option');
+        option.value = c.id;
+        option.textContent = `${c.date} - ${c.clientName} (${formatCurrency(c.amount)})`;
+        select.appendChild(option);
+    });
+}
+
+function generateInvoiceFromSelect(viewOnly) {
+    const cobroId = document.getElementById("invoice-cobro-id").value;
+    if (!cobroId) return alert("Por favor, seleccione un cobro del historial.");
+    
+    // Si viewOnly es true, mostramos en el modal. Si es false, descargamos.
+    if (viewOnly) {
+        // Al llamar sin el segundo parámetro (previousState), la función createInvoiceDocument 
+        // recalculará el estado anterior retroactivamente.
+        viewInvoicePDF(cobroId); 
+    } else {
+        generateInvoicePDF(cobroId); 
+    }
+}
+// FIN NUEVA FUNCIÓN SELECT COBROS
+
 function updatePaymentDetails() {
     const loanId = document.getElementById("payment-loan-id").value;
     const summaryBox = document.getElementById("loan-summary-payment");
     const paymentAmountInput = document.getElementById("payment-amount");
-    const settings = DB.getSettings();
     
     summaryBox.innerHTML = 'Seleccione un préstamo para ver el resumen de pago.';
     paymentAmountInput.value = ''; // Limpiar monto de pago
@@ -1052,22 +1206,25 @@ function updatePaymentDetails() {
     const risk = calculateLoanRisk(loan);
     
     let moraText = '';
-    if (risk.monthsBehind > 0) {
-        moraText = `<p style="color:#e74c3c; font-weight:bold; margin: 5px 0;">¡En Mora! Adeuda ${risk.monthsBehind} cuota(s) por un total de ${settings.currencySymbol} ${risk.totalDue.toFixed(2)}.</p>`;
+    
+    // Si el restante es menor a cero (por posibles desajustes de coma flotante)
+    if (remainingBalance <= 0.01) { 
+        paymentAmountInput.value = '0.00';
+        moraText = '<p style="color:#2ecc71; font-weight:bold; margin: 5px 0;">Préstamo completamente saldado.</p>';
+    } else if (risk.monthsBehind > 0) {
+        moraText = `<p style="color:#e74c3c; font-weight:bold; margin: 5px 0;">¡En Mora! Adeuda ${risk.monthsBehind} cuota(s) por un total de ${formatCurrency(risk.totalDue)}.</p>`;
         paymentAmountInput.value = risk.totalDue.toFixed(2); // Sugerir el monto en mora
+    } else if (remainingBalance > 0 && remainingBalance < cuotaMensual) {
+        paymentAmountInput.value = remainingBalance.toFixed(2); // Sugerir el restante (pago final)
     } else {
         paymentAmountInput.value = cuotaMensual.toFixed(2); // Sugerir la cuota normal
-    }
-    
-    if (remainingBalance < cuotaMensual) {
-        paymentAmountInput.value = remainingBalance.toFixed(2); // Sugerir el monto restante si es menor a la cuota
     }
 
 
     summaryBox.innerHTML = `
         <p style="margin: 5px 0;">Cliente: <b>${loan.clientName}</b></p>
-        <p style="margin: 5px 0;">Cuota Fija: <b>${settings.currencySymbol} ${cuotaMensual.toFixed(2)}</b></p>
-        <p style="margin: 5px 0;">Saldo Restante: <b>${settings.currencySymbol} ${remainingBalance.toFixed(2)}</b></p>
+        <p style="margin: 5px 0;">Cuota Fija: <b>${formatCurrency(cuotaMensual)}</b></p>
+        <p style="margin: 5px 0;">Saldo Restante: <b>${formatCurrency(remainingBalance)}</b></p>
         ${moraText}
     `;
 }
@@ -1088,36 +1245,39 @@ function registerPayment() {
     const cuotaMensual = Number(loan.monthlyPayment);
     
     if (amount > remainingBalance + 0.01) { // Añadir un pequeño margen por errores de coma flotante
-        if (!confirm(`El monto de ${DB.getSettings().currencySymbol} ${amount.toFixed(2)} es mayor al saldo pendiente (${DB.getSettings().currencySymbol} ${remainingBalance.toFixed(2)}). ¿Desea registrar el pago igual? El saldo restante se ajustará a cero.`)) {
+        if (!confirm(`El monto de ${formatCurrency(amount)} es mayor al saldo pendiente (${formatCurrency(remainingBalance)}). ¿Desea registrar el pago igual? El saldo restante se ajustará a cero.`)) {
             return;
         }
     }
     
-    // 1. Registrar el cobro
+    // 1. Guardar el estado ANTES del nuevo cobro para el cálculo de la factura
+    const oldTotalPaidAmount = Number(loan.totalPaidAmount);
+    // Calcular paymentsMadeBefore basado en el total pagado antes del cobro actual
+    const oldPaymentsMade = Math.floor(oldTotalPaidAmount / cuotaMensual);
+
+    // 2. Registrar el cobro
     let allCobros = DB.getInitialCobros();
-    allCobros.push({
+    const newCobro = {
         id: genId(),
         loanId: loanId,
         clientName: loan.clientName,
         amount: amount.toFixed(2), // Guardar como string con 2 decimales
         date: new Date().toLocaleDateString(),
         fullDateTime: new Date().toISOString()
-    });
+    };
+    allCobros.push(newCobro);
     DB.set("cobros", allCobros);
 
-    // 2. Actualizar el préstamo
-    loan.totalPaidAmount = (Number(loan.totalPaidAmount) + amount);
-    
-    // Estimar el número de cuotas pagadas (puede ser un pago parcial de la última cuota)
-    // El número de cuotas pagadas es el floor(totalPagado / cuotaMensual)
+    // 3. Actualizar el préstamo
+    loan.totalPaidAmount = oldTotalPaidAmount + amount;
     loan.paymentsMade = Math.floor(loan.totalPaidAmount / cuotaMensual);
 
-    // 3. Revisar el estado
+    // 4. Revisar el estado
     const newRemaining = totalPagar - loan.totalPaidAmount;
-    if (newRemaining <= 0.01) { // Considerar pagado si el restante es casi cero
+    if (newRemaining <= 0.01) { 
         loan.status = 'Pagado';
-        loan.totalPaidAmount = totalPagar; // Asegurar que quede exactamente en el total a pagar
-        loan.paymentsMade = Number(loan.termMonths); // Asegurar que las cuotas sean el total
+        loan.totalPaidAmount = totalPagar; 
+        loan.paymentsMade = Number(loan.termMonths); 
     } else {
         loan.status = 'Activo'; 
     }
@@ -1125,27 +1285,318 @@ function registerPayment() {
     allLoans[loanIndex] = loan;
     DB.set("loans", allLoans);
 
-    alert(`Cobro de ${DB.getSettings().currencySymbol} ${amount.toFixed(2)} registrado para ${loan.clientName}.`);
+    alert(`Cobro de ${formatCurrency(amount)} registrado para ${loan.clientName}.`);
+    
+    // MEJORA 14: LÓGICA: GENERAR FACTURA AL COBRAR (PREGUNTA)
+    if (confirm("Cobro exitoso. ¿Desea ver y descargar la factura del pago en PDF?")) {
+        // Enviar el ID del cobro recién creado y el estado anterior
+        viewInvoicePDF(newCobro.id, {
+            oldTotalPaidAmount,
+            oldPaymentsMade
+        }); 
+    }
+    // **********************************************
 
     // Refrescar vistas
     document.getElementById("payment-amount").value = '';
     document.getElementById("payment-loan-id").value = '';
     document.getElementById("loan-summary-payment").innerHTML = 'Seleccione un préstamo para ver el resumen de pago.';
     populateLoanSelect();
+    populateCobroSelectForInvoice(); // Refrescar el select de factura
     refreshPendingPayments();
 }
+
+// ===============================================
+// MEJORA 14: FUNCIONES DE FACTURACIÓN PDF
+// ===============================================
+let currentCobroId = null; // Variable global para saber qué cobro descargar
+
+function createInvoiceDocument(cobroId, previousState = {}) {
+    // 1. Obtener Datos
+    const cobro = DB.getInitialCobros().find(c => c.id === cobroId);
+    if (!cobro) { alert("Error: Cobro no encontrado."); return null; }
+
+    const loan = DB.get("loans").find(l => l.id === cobro.loanId);
+    if (!loan) { alert("Error: Préstamo asociado no encontrado."); return null; }
+    
+    // Intentar obtener datos completos del cliente
+    const client = DB.get("clients").find(cl => cl.id === loan.clientId) || { 
+        name: loan.clientName, 
+        cedula: 'N/A', 
+        phoneMain: 'N/A', 
+        phoneMobile: 'N/A', 
+        address: 'N/A' 
+    };
+    
+    const settings = DB.getSettings();
+    
+    // 2. Calcular Saldos
+    const amountPaid = Number(cobro.amount);
+    const totalPagar = Number(loan.amount) + Number(loan.totalInterest);
+    const cuotaMensual = Number(loan.monthlyPayment);
+    
+    // Determinar si se usa el estado de la DB o se recalcula retroactivamente
+    const isStateProvided = previousState.oldTotalPaidAmount !== undefined;
+
+    let totalPaidBefore = 0;
+    let paymentsMadeBefore = 0;
+    
+    if (!isStateProvided) {
+        // Recalcular el total pagado antes de ESTE cobro de forma retroactiva
+        const allCobrosForLoan = DB.getInitialCobros()
+            .filter(c => c.loanId === loan.id)
+            .sort((a, b) => new Date(a.fullDateTime) - new Date(b.fullDateTime));
+        
+        // Sumar todos los cobros anteriores al cobro actual
+        for (const c of allCobrosForLoan) {
+            if (c.id === cobro.id) break; // Detener en el cobro que estamos facturando
+            totalPaidBefore += Number(c.amount);
+        }
+        paymentsMadeBefore = Math.floor(totalPaidBefore / cuotaMensual);
+
+    } else {
+        totalPaidBefore = previousState.oldTotalPaidAmount;
+        paymentsMadeBefore = previousState.oldPaymentsMade;
+    }
+    
+    // *** CORRECCIÓN CRÍTICA: Definir el saldo restante ANTES del pago
+    const remainingBalanceBefore = totalPagar - totalPaidBefore; 
+    
+    // Recalcular la mora ANTES de este cobro para el desglose (basado en el estado ANTES)
+    const oldRisk = calculateLoanRisk({ 
+        ...loan, 
+        totalPaidAmount: totalPaidBefore, 
+        paymentsMade: paymentsMadeBefore 
+    });
+    
+    const moraPagada = Math.min(amountPaid, oldRisk.totalDue);
+    
+    // Abono que queda después de pagar la mora
+    let abonoPrincipalInteres = amountPaid - moraPagada; 
+    
+    // Lógica para determinar el abono extra (adelanto)
+    let abonoProximaCuota = 0;
+    
+    if (oldRisk.monthsBehind > 0) {
+        // Si había mora, y el pago es mayor a la mora + cuota, el resto es adelanto.
+        // Pero dado que los pagos se calculan contra lo adeudado, simplificamos:
+        // Si ya se cubrió la mora, lo que resta de abonoPrincipalInteres puede ir a la siguiente cuota.
+        // Lo que se asigna a la cuota regular (si no estaba en mora o si se cubrió)
+        const pagoACuotaNormal = Math.min(cuotaMensual, abonoPrincipalInteres);
+        
+        // El adelanto es el excedente después de cubrir la cuota y la mora.
+        abonoProximaCuota = Math.max(0, abonoPrincipalInteres - pagoACuotaNormal);
+        
+    } else {
+        // Si no había mora, el abono es el total pagado.
+        abonoPrincipalInteres = amountPaid;
+        
+        // Adelanto es cualquier cosa por encima de la cuota mensual.
+        abonoProximaCuota = Math.max(0, amountPaid - cuotaMensual);
+    }
+    
+    // Aseguramos que el pago a la próxima cuota no sea negativo (aunque el cálculo anterior lo evita)
+    abonoProximaCuota = Math.max(0, abonoProximaCuota);
+    
+    // Monto que realmente fue a cubrir la parte "normal" de la deuda (no mora, no adelanto)
+    const abonoNormal = amountPaid - moraPagada - abonoProximaCuota;
+
+    // Datos Finales
+    const remainingBalanceAfter = totalPagar - (totalPaidBefore + amountPaid);
+    // Para la factura, usar el cálculo simple de pagos/cuotas
+    const paymentsMadeAfter = Math.floor((totalPaidBefore + amountPaid) / cuotaMensual); 
+
+
+    // 3. Crear Documento PDF
+    const doc = new jsPDF();
+    let y = 15; // Posición inicial Y
+
+    // --- ENCABEZADO Y DATOS DE EMPRESA (Tú) ---
+    doc.setFontSize(18);
+    doc.setTextColor(28, 93, 153); // Azul Oscuro
+    doc.text("RECIBO DE PAGO", 105, y, null, null, "center");
+    y += 10;
+    
+    doc.setFontSize(10);
+    doc.setTextColor(51, 51, 51);
+    doc.text("Presta Bill S.A. (Sistema de Préstamos)", 105, y, null, null, "center");
+    y += 5;
+    doc.text("Tel: N/A - Dir: N/A", 105, y, null, null, "center");
+    y += 10;
+    
+    // --- LÍNEA SEPARADORA ---
+    doc.setDrawColor(200, 200, 200);
+    doc.line(10, y, 200, y);
+    y += 5;
+
+    // --- DETALLES DE LA TRANSACCIÓN y CLIENTE (Lado a Lado) ---
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    
+    doc.text(`Recibo No: ${cobro.id.toUpperCase().substring(0, 8)}`, 10, y);
+    doc.text(`Fecha: ${cobro.date}`, 140, y);
+    y += 5;
+
+    doc.text(`Cliente: ${client.name}`, 10, y);
+    doc.text(`Cédula: ${client.cedula || 'N/A'}`, 140, y);
+    y += 5;
+    
+    doc.text(`Préstamo ID: ${loan.id.toUpperCase().substring(0, 8)}`, 10, y);
+    doc.text(`Cuota Mensual Fija: ${formatCurrency(cuotaMensual)}`, 140, y);
+    y += 5;
+    
+    doc.text(`Monto Principal: ${formatCurrency(loan.amount)}`, 10, y);
+    doc.text(`Total a Pagar (Ppal + Int): ${formatCurrency(totalPagar)}`, 140, y);
+    y += 8;
+
+    // --- TABLA DE DESGLOSE DE PAGO ---
+    let desgloseData = [
+         // Si había mora, mostrarla
+        ...(moraPagada > 0 ? [["Mora Atrasada Cubierta:", formatCurrency(moraPagada)]] : []),
+        ["Abono a Cuota Normal/Principal:", formatCurrency(abonoNormal)],
+        ...(abonoProximaCuota > 0 ? [["Aporte Extra/Adelanto Cuota:", formatCurrency(abonoProximaCuota)]] : []),
+        ["--------------------------------", "--------------------------------"],
+        ["MONTO TOTAL DE ESTE COBRO:", formatCurrency(amountPaid)],
+    ];
+    
+    doc.autoTable({
+        startY: y,
+        head: [['Desglose del Pago', 'Monto']],
+        body: desgloseData,
+        theme: 'striped',
+        styles: { fontSize: 10, cellPadding: 3 },
+        headStyles: { fillColor: [44, 62, 80], textColor: 255 },
+        columnStyles: {
+            0: { fontStyle: 'bold', cellWidth: 100 },
+            1: { halign: 'right', fontStyle: 'bold' }
+        },
+        didParseCell: function(data) {
+            // Estilo especial para la fila del monto total
+            if (data.row.index === desgloseData.length - 1) {
+                data.cell.styles.fillColor = [220, 240, 220]; // Verde claro
+            }
+        },
+        willDrawCell: function(data) {
+            if (data.row.index === desgloseData.length - 1 && data.section === 'body') {
+                doc.setFontSize(12);
+                doc.setTextColor(46, 204, 113); // Color verde para el monto pagado
+            } else if (data.section === 'body') {
+                 doc.setFontSize(10);
+                 doc.setTextColor(0, 0, 0);
+            }
+        }
+    });
+    
+    y = doc.autoTable.previous.finalY + 5;
+
+    // --- TABLA DE SALDOS FINALES ---
+    const finalData = [
+        ["Saldo Pendiente ANTES de este Pago:", formatCurrency(remainingBalanceBefore)],
+        ["SALDO PENDIENTE DESPUÉS del Pago:", formatCurrency(remainingBalanceAfter)],
+        ["Cuotas Pagadas (Acumulado):", `${paymentsMadeAfter} de ${loan.termMonths}`]
+    ];
+    
+    doc.autoTable({
+        startY: y,
+        head: [['Estado del Préstamo', 'Monto/Valor']],
+        body: finalData,
+        theme: 'plain',
+        styles: { fontSize: 10, cellPadding: 3 },
+        headStyles: { fillColor: [28, 93, 153], textColor: 255 },
+        columnStyles: {
+            0: { fontStyle: 'bold', cellWidth: 100 },
+            1: { halign: 'right', fontStyle: 'bold' }
+        },
+        didParseCell: function(data) {
+            // Estilo especial para la fila del saldo final
+            if (data.row.index === 1) {
+                data.cell.styles.fillColor = [200, 220, 240];
+            }
+        },
+    });
+
+    y = doc.autoTable.previous.finalY + 10;
+    
+    // --- NOTAS FINALES ---
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text('Este documento es un comprobante de pago. Guarde para sus registros.', 10, y);
+    y += 5;
+    doc.text(`*El estado final del préstamo es: ${remainingBalanceAfter > 0.01 ? 'Activo' : 'Pagado'}.`, 10, y);
+
+    // --- PIE DE PÁGINA (Firma) ---
+    y = doc.internal.pageSize.height - 30; // 30mm desde el fondo
+    doc.line(70, y, 140, y);
+    doc.text('Firma/Sello de Presta Bill', 105, y + 5, null, null, "center");
+
+    return { doc, clientName: client.name, cobroDate: cobro.date };
+}
+
+// FUNCIÓN: GENERAR Y DESCARGAR FACTURA PDF
+function generateInvoicePDF(cobroId, previousState = {}) {
+    const result = createInvoiceDocument(cobroId, previousState);
+    if (!result) return;
+    
+    const { doc, clientName, cobroDate } = result;
+
+    // 4. Guardar PDF
+    const fileName = `Factura_Cobro_${clientName.replace(/\s/g, '_')}_${cobroDate.replace(/\//g, '-')}.pdf`;
+    doc.save(fileName);
+}
+
+// FUNCIÓN: GENERAR Y VISUALIZAR FACTURA PDF (NUEVA)
+function viewInvoicePDF(cobroId, previousState = {}) {
+    const result = createInvoiceDocument(cobroId, previousState);
+    if (!result) return;
+    
+    const { doc, clientName, cobroDate } = result;
+
+    // 1. Convertir el PDF a Data URI
+    const pdfDataUri = doc.output('datauristring');
+    
+    // 2. Cargar en el iframe
+    const iframe = document.getElementById('invoice-iframe');
+    const modal = document.getElementById('invoice-modal');
+    const title = document.getElementById('modal-invoice-title');
+    
+    iframe.src = pdfDataUri;
+    title.textContent = `Factura de Cobro: ${clientName} (${cobroDate})`;
+    currentCobroId = cobroId; // Guardar el ID para la descarga
+    
+    // 3. Mostrar el modal
+    modal.style.display = 'flex';
+}
+
+// Función para cerrar el modal
+function closeInvoiceModal() {
+    const modal = document.getElementById('invoice-modal');
+    const iframe = document.getElementById('invoice-iframe');
+    modal.style.display = 'none';
+    iframe.src = 'about:blank'; // Limpiar el iframe
+    currentCobroId = null; // Limpiar el ID
+}
+
+// Función que usa el ID global para la descarga
+function downloadInvoice() {
+    if (currentCobroId) {
+        generateInvoicePDF(currentCobroId);
+    } else {
+        alert("No hay una factura seleccionada para descargar.");
+    }
+}
+// ===============================================
+
 
 function refreshPendingPayments() {
     const allLoans = DB.get("loans").filter(l => l.status !== 'Pagado');
     const box = document.getElementById("pending-payments-list");
-    const settings = DB.getSettings();
 
     if (allLoans.length === 0) {
         box.innerHTML = '<p style="text-align:center;">No hay préstamos pendientes de pago.</p>';
         return;
     }
 
-    const tableRows = allLoans.map(l => {
+    const tableRows = allLoans.map((l, index) => {
         const risk = calculateLoanRisk(l);
         const totalPagar = Number(l.amount) + Number(l.totalInterest);
         const remainingBalance = totalPagar - Number(l.totalPaidAmount);
@@ -1153,14 +1604,22 @@ function refreshPendingPayments() {
         const moraClass = risk.monthsBehind > 0 ? 'mora-alert-text' : '';
         const moraText = risk.monthsBehind > 0 ? `${risk.monthsBehind} Meses` : 'Al día';
         const nextDueText = risk.nextDueDate ? risk.nextDueDate.split('-').reverse().join('/') : 'N/A';
-        const dueAmountText = risk.monthsBehind > 0 ? `${settings.currencySymbol} ${risk.totalDue.toFixed(2)}` : `${settings.currencySymbol} ${Number(l.monthlyPayment).toFixed(2)}`;
+        // Si hay mora, mostrar el total de la mora. Si no, mostrar la cuota normal.
+        const dueAmountText = risk.monthsBehind > 0 ? formatCurrency(risk.totalDue) : formatCurrency(l.monthlyPayment);
 
+        // MEJORA 10: Doble clic para seleccionar y sugerir cobro
         return `
-            <tr onclick="document.getElementById('payment-loan-id').value='${l.id}'; updatePaymentDetails();" style="cursor:pointer;">
+            <tr class="${index % 2 === 0 ? 'neutral-row-even' : 'neutral-row-odd'}"
+                ondblclick="
+                    document.getElementById('payment-loan-id').value='${l.id}'; 
+                    updatePaymentDetails();
+                    document.getElementById('payment-amount').scrollIntoView({ behavior: 'smooth', block: 'center' }); 
+                    document.getElementById('payment-amount').focus();" 
+                style="cursor:pointer;">
                 <td class="client-loan-cell">${l.clientName}</td>
                 <td>${l.paymentsMade}/${l.termMonths}</td>
                 <td>${nextDueText}</td>
-                <td>${settings.currencySymbol} ${remainingBalance.toFixed(2)}</td>
+                <td>${formatCurrency(remainingBalance)}</td>
                 <td class="${moraClass}">${moraText}</td>
                 <td>${dueAmountText}</td>
                 <td>
@@ -1168,9 +1627,7 @@ function refreshPendingPayments() {
                         onclick="event.stopPropagation(); 
                         document.getElementById('payment-loan-id').value='${l.id}'; 
                         updatePaymentDetails(); 
-                        // MEJORA 2: Indicador de Posición/Scroll
                         document.getElementById('payment-amount').scrollIntoView({ behavior: 'smooth', block: 'center' }); 
-                        // FIN MEJORA 2
                         document.getElementById('payment-amount').focus();">Cobrar
                     </button>
                 </td>
@@ -1196,6 +1653,7 @@ function refreshPendingPayments() {
                     ${tableRows}
                 </tbody>
             </table>
+            <p style="font-size:0.9em; margin-top:15px; color:#666;">*Doble clic en la fila para cargar el préstamo en el formulario de pago.</p>
         </div>
     `;
 }
@@ -1214,7 +1672,6 @@ function renderCobrosHistory() {
 function refreshCobrosHistory() {
     const allCobros = DB.getInitialCobros().sort((a, b) => new Date(b.fullDateTime) - new Date(a.fullDateTime)); // Ordenar por fecha, el más reciente primero
     const box = document.getElementById("cobros-history-list");
-    const settings = DB.getSettings();
 
     if (allCobros.length === 0) {
         box.innerHTML = '<p style="text-align:center; padding:20px;">No hay transacciones de cobros registradas.</p>';
@@ -1225,8 +1682,12 @@ function refreshCobrosHistory() {
         <tr class="${index % 2 === 0 ? 'neutral-row-even' : 'neutral-row-odd'}">
             <td>${c.date}</td>
             <td>${c.clientName}</td>
-            <td>${settings.currencySymbol} ${Number(c.amount).toFixed(2)}</td>
-            <td><button class="action-btn" style="padding: 5px 10px; width:auto; font-size:14px; background:#e74c3c;" onclick="deleteCobro('${c.id}')">Eliminar</button></td>
+            <td>${formatCurrency(c.amount)}</td>
+            <td>
+                <button class="action-btn" style="padding: 5px 10px; width:auto; font-size:14px; background:#8e44ad; margin-right: 5px;" onclick="viewInvoicePDF('${c.id}')">👁️ Ver Factura</button>
+                <button class="action-btn" style="padding: 5px 10px; width:auto; font-size:14px; background:#2ecc71; margin-right: 5px;" onclick="generateInvoicePDF('${c.id}')">⬇️ Descargar</button>
+                <button class="action-btn" style="padding: 5px 10px; width:auto; font-size:14px; background:#e74c3c;" onclick="deleteCobro('${c.id}')">🗑️ Eliminar</button>
+            </td>
         </tr>
     `).join('');
 
@@ -1249,9 +1710,7 @@ function refreshCobrosHistory() {
     `;
 }
 
-// ===============================================
-// FUNCIÓN DE ELIMINACIÓN DE COBRO (CASCADA)
-// ===============================================
+// MEJORA 12: FUNCIÓN DE ELIMINACIÓN DE COBRO (CASCADA)
 function deleteCobro(cobroId) {
     if (!confirm("ADVERTENCIA: ¿Está seguro de que desea eliminar este cobro? Esto ajustará los saldos del préstamo asociado.")) return;
 
@@ -1312,21 +1771,20 @@ function deleteCobro(cobroId) {
 function renderReports() {
     
     const summary = calculateLoanPortfolioSummary();
-    const settings = DB.getSettings();
     
     main.innerHTML = `
         <h2>Reportes y Análisis 📊</h2>
         
-        <div class="dashboard-cards-container" style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:20px;">
+        <div class="dashboard-cards-container">
             <div class="card card-no-border-left" style="flex:1 1 200px; border-left: 5px solid #1c5d99;">
                 <h3>Total Prestado (Principal)</h3>
-                <p style="font-size:30px; font-weight:bold;">${settings.currencySymbol} ${summary.totalPrincipalLent.toFixed(2)}</p>
+                <p style="font-size:30px; font-weight:bold;">${formatCurrency(summary.totalPrincipalLent)}</p>
                 <p style="margin:0; font-size:0.9em; color:#888;">Capital inicial prestado.</p>
             </div>
             <div class="card card-no-border-left" style="flex:1 1 200px; border-left: 5px solid #e74c3c;">
-                <h3>Capital en Mora Estimado</h3>
-                <p style="font-size:30px; font-weight:bold; color:#e74c3c;">${settings.currencySymbol} ${summary.moraAmount.toFixed(2)}</p>
-                <p style="margin:0; font-size:0.9em; color:#888;">Saldo pendiente de préstamos en mora.</p>
+                <h3>Capital en Mora Adeudado</h3>
+                <p style="font-size:30px; font-weight:bold; color:#e74c3c;">${formatCurrency(summary.moraAmount)}</p>
+                <p style="margin:0; font-size:0.9em; color:#888;">Monto de cuotas vencidas y no pagadas.</p>
             </div>
         </div>
 
@@ -1345,7 +1803,6 @@ function renderReports() {
 
 function renderClientRanking() {
     const loans = DB.get("loans");
-    const settings = DB.getSettings();
     const clientRanking = {};
 
     // 1. Agrupar por cliente y sumar montos originales prestados
@@ -1375,7 +1832,7 @@ function renderClientRanking() {
         <tr class="${index % 2 === 0 ? 'neutral-row-even' : 'neutral-row-odd'}">
             <td>#${index + 1}</td>
             <td class="client-loan-cell">${r.name}</td>
-            <td>${settings.currencySymbol} ${r.totalAmount.toFixed(2)}</td>
+            <td>${formatCurrency(r.totalAmount)}</td>
             <td>${r.activeLoans}</td>
         </tr>
     `).join('');
@@ -1393,7 +1850,7 @@ function renderClientRanking() {
                 </thead>
                 <tbody>
                     ${tableRows}
-                </</tbody>
+                </tbody>
             </table>
         </div>
     `;
@@ -1401,7 +1858,6 @@ function renderClientRanking() {
 
 function renderMoraLoansDetail() {
     const allLoans = DB.get("loans");
-    const settings = DB.getSettings();
     const loansInMora = allLoans
         .map(l => ({ ...l, risk: calculateLoanRisk(l) }))
         .filter(l => l.risk.monthsBehind > 0)
@@ -1423,8 +1879,8 @@ function renderMoraLoansDetail() {
                 <td class="client-loan-cell">${l.clientName}</td>
                 <td class="mora-alert-text">${l.risk.monthsBehind}</td>
                 <td>${l.paymentsMade}/${l.termMonths}</td>
-                <td>${settings.currencySymbol} ${remainingBalance.toFixed(2)}</td>
-                <td>${settings.currencySymbol} ${l.risk.totalDue.toFixed(2)}</td>
+                <td>${formatCurrency(remainingBalance)}</td>
+                <td>${formatCurrency(l.risk.totalDue)}</td>
             </tr>
         `;
     }).join('');
@@ -1454,15 +1910,15 @@ function renderSettings() {
     const settings = DB.getSettings();
     main.innerHTML = `
         <h2>Configuraciones Globales ⚙️</h2>
-        <div class="card">
+        <div class="card" style="background: #f0f7ff; border: 1px solid #d0e8ff;">
             <h3 style="margin-top:0;">Parámetros Financieros</h3>
-            <label>Símbolo de Moneda (Ej: RD$, US$):
-                <input type="text" id="setting-currency-symbol" class="form-input" value="${settings.currencySymbol}" style="margin-bottom:10px;">
-            </label>
-            <label>Tasa de Interés Base (%) - Para 3 meses:
-                <input type="number" id="setting-interest-rate" class="form-input" value="${settings.baseInterestRate}" step="0.1" style="margin-bottom:10px;">
-            </label>
-            <button class="action-btn" onclick="saveSettings()">Guardar Configuraciones</button>
+            <label for="setting-currency-symbol" style="display:block; font-weight:bold; margin-bottom:5px;">Símbolo de Moneda (Ej: RD$, US$):</label>
+            <input type="text" id="setting-currency-symbol" class="form-input" value="${settings.currencySymbol}" style="margin-bottom:15px;">
+            
+            <label for="setting-interest-rate" style="display:block; font-weight:bold; margin-bottom:5px;">Tasa de Interés Base (%) - Para 3 meses:</label>
+            <input type="number" id="setting-interest-rate" class="form-input" value="${settings.baseInterestRate}" min="0" step="0.1" style="margin-bottom:15px;">
+            
+            <button class="action-btn" onclick="saveSettings()">💾 Guardar Configuraciones</button>
         </div>
     `;
 }
@@ -1494,23 +1950,23 @@ function renderMaintenance() {
     main.innerHTML = `
         <h2>Mantenimiento y Respaldo 💾</h2>
         
-        <div class="card">
+        <div class="card" style="background: #fff0f0; border: 1px solid #e74c3c;">
             <h3 style="color:#e74c3c;">Restablecer Datos</h3>
             <p>Esta acción eliminará todos los datos de Clientes, Préstamos y Cobros de forma permanente. **¡No se puede deshacer!**</p>
-            <button class="action-btn" style="background:#c0392b;" onclick="resetData()">Eliminar Todos los Datos</button>
+            <button class="action-btn" style="background:#c0392b;" onclick="resetData()">🗑️ Eliminar Todos los Datos</button>
         </div>
         
         <div class="card">
             <h3>Exportar Respaldo</h3>
             <p>Guarde un respaldo de todos los datos como un archivo JSON. Puede importarlo más tarde o usarlo como copia de seguridad.</p>
-            <button class="action-btn" onclick="exportData()">Exportar Datos (JSON)</button>
+            <button class="action-btn" onclick="exportData()">⬇️ Exportar Datos (JSON)</button>
         </div>
         
         <div class="card">
             <h3>Importar Respaldo</h3>
             <p>Seleccione un archivo JSON de respaldo para restaurar los datos. **Esto sobrescribirá los datos existentes.**</p>
             <input type="file" id="import-file" accept=".json" class="form-input" style="margin-bottom:10px;">
-            <button class="action-btn" onclick="importData()">Importar Datos (JSON)</button>
+            <button class="action-btn" onclick="importData()">⬆️ Importar Datos (JSON)</button>
         </div>
     `;
 }
@@ -1579,7 +2035,7 @@ function importData() {
                 alert("Datos importados y restaurados correctamente. La aplicación se reiniciará al Dashboard.");
                 renderDashboard();
             } else {
-                alert("Error: El archivo JSON no tiene la estructura de respaldo esperada (clientes, loans, cobros).");
+                alert("Error: El archivo JSON no tiene la estructura de respaldo esperada (clients, loans, cobros).");
             }
         } catch (error) {
             alert("Error al procesar el archivo: " + error.message);
