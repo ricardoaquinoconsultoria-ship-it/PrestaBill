@@ -1269,40 +1269,6 @@ function populateLoanSelect(loanIdToSelect) {
     }
 }
 
-// MEJORA 14: NUEVA FUNCIÓN PARA POBLAR SELECT DE COBROS EN FACTURA
-function populateCobroSelectForInvoice() {
-    const allCobros = DB.getInitialCobros().sort((a, b) => new Date(b.fullDateTime) - new Date(a.fullDateTime)); // El más reciente primero
-    const select = document.getElementById("invoice-cobro-id");
-    
-    if (!select) return; // Salir si el select no existe (ej: estamos en otra vista)
-
-    select.innerHTML = '<option value="">-- Seleccione un Cobro del Historial --</option>'; 
-    
-    allCobros.slice(0, 100).forEach(c => { // Limitar a 100 para no sobrecargar
-        const option = document.createElement('option');
-        option.value = c.id;
-        option.textContent = `${c.date} - ${c.clientName} (${formatCurrency(c.amount)})`;
-        select.appendChild(option);
-    });
-}
-
-function generateInvoiceFromSelect(viewOnly) {
-    const cobroId = document.getElementById("invoice-cobro-id").value;
-    if (!cobroId) {
-        showToast("Por favor, seleccione un cobro del historial.", 'error'); // MEJORA 15
-        return;
-    }
-    
-    // Al llamar sin el segundo parámetro (previousState), la función createInvoiceDocument 
-    // recalculará el estado anterior retroactivamente.
-    if (viewOnly) {
-        viewInvoicePDF(cobroId); 
-    } else {
-        generateInvoicePDF(cobroId); 
-    }
-}
-// FIN NUEVA FUNCIÓN SELECT COBROS
-
 function updatePaymentDetails() {
     const loanId = document.getElementById("payment-loan-id").value;
     const summaryBox = document.getElementById("loan-summary-payment");
@@ -1433,6 +1399,42 @@ function registerPayment() {
 // ===============================================
 let currentCobroId = null; // Variable global para saber qué cobro descargar
 
+// MEJORA 14: NUEVA FUNCIÓN PARA POBLAR SELECT DE COBROS EN FACTURA
+function populateCobroSelectForInvoice() {
+    const allCobros = DB.getInitialCobros().sort((a, b) => new Date(b.fullDateTime) - new Date(a.fullDateTime)); // El más reciente primero
+    const select = document.getElementById("invoice-cobro-id");
+    
+    if (!select) return; // Salir si el select no existe (ej: estamos en otra vista)
+
+    select.innerHTML = '<option value="">-- Seleccione un Cobro del Historial --</option>'; 
+    
+    allCobros.slice(0, 100).forEach(c => { // Limitar a 100 para no sobrecargar
+        const option = document.createElement('option');
+        option.value = c.id;
+        option.textContent = `${c.date} - ${c.clientName} (${formatCurrency(c.amount)})`;
+        select.appendChild(option);
+    });
+}
+
+function generateInvoiceFromSelect(viewOnly) {
+    const cobroId = document.getElementById("invoice-cobro-id").value;
+    if (!cobroId) {
+        showToast("Por favor, seleccione un cobro del historial.", 'error'); // MEJORA 15
+        return;
+    }
+    
+    // Al llamar sin el segundo parámetro (previousState), la función createInvoiceDocument 
+    // recalculará el estado anterior retroactivamente.
+    if (viewOnly) {
+        viewInvoicePDF(cobroId); 
+    } else {
+        generateInvoicePDF(cobroId); 
+    }
+}
+
+// ===============================
+// FUNCIÓN PRINCIPAL DE CREACIÓN DE PDF
+// ===============================
 function createInvoiceDocument(cobroId, previousState = {}) {
     // 1. Obtener Datos
     const cobro = DB.getInitialCobros().find(c => c.id === cobroId);
@@ -1463,7 +1465,7 @@ function createInvoiceDocument(cobroId, previousState = {}) {
     const totalPagar = Number(loan.amount) + Number(loan.totalInterest);
     const cuotaMensual = Number(loan.monthlyPayment);
     
-    // Determinar si se usa el estado de la DB o se recalcula retroactivamente
+    // Determinar si se usa el estado de la DB (al registrar) o se recalcula retroactivamente (al ver historial)
     const isStateProvided = previousState.oldTotalPaidAmount !== undefined;
 
     let totalPaidBefore = 0;
@@ -1552,13 +1554,11 @@ function createInvoiceDocument(cobroId, previousState = {}) {
     doc.setTextColor(0, 0, 0);
 
     const marginLeft = 10;
-    // const marginRight = pageWidth - 10; // No se usa directamente aquí
-
     const columnWidth = (pageWidth - 20) / 2; // ancho exacto de cada columna
     const col1X = marginLeft;
     const col2X = marginLeft + columnWidth + 5; // separador profesional
 
-    // Helper para escribir pares de campos (integrado en el scope de la función)
+    // Helper para escribir pares de campos
     function writeRow(leftText, rightText) {
         doc.text(leftText, col1X, y);
         // Alineación derecha para el segundo campo, usando el ancho de columna
@@ -1605,7 +1605,6 @@ function createInvoiceDocument(cobroId, previousState = {}) {
         headStyles: { fillColor: [44, 62, 80], textColor: 255 },
         columnStyles: {
             0: { fontStyle: 'bold', cellWidth: 100 },
-            // MEJORA: Alinear el encabezado a la derecha para que quede sobre las cifras
             1: { halign: 'right', fontStyle: 'bold' } 
         },
         didParseCell: function(data) {
@@ -1643,7 +1642,6 @@ function createInvoiceDocument(cobroId, previousState = {}) {
         headStyles: { fillColor: [28, 93, 153], textColor: 255 },
         columnStyles: {
             0: { fontStyle: 'bold', cellWidth: 100 },
-            // MEJORA: Alinear el encabezado a la derecha para que quede sobre las cifras
             1: { halign: 'right', fontStyle: 'bold' } 
         },
         didParseCell: function(data) {
