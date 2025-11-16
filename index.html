@@ -1324,7 +1324,7 @@ function registerPayment() {
 }
 
 // ===============================================
-// MEJORA 14: FUNCIONES DE FACTURACIÓN PDF
+// MEJORA 14: FUNCIONES DE FACTURACIÓN PDF (ACTUALIZADO CON autoTable)
 // ===============================================
 let currentCobroId = null; // Variable global para saber qué cobro descargar
 
@@ -1417,9 +1417,6 @@ function createInvoiceDocument(cobroId, previousState = {}) {
     const doc = new jsPDF();
     let y = 15; // Posición inicial Y
 
-    // Nueva posición horizontal para la columna derecha
-    const rightX = 115;   // Antes era 140, ahora está más al centro
-
     // --- ENCABEZADO Y DATOS DE EMPRESA (Tú) ---
     doc.setFontSize(18);
     doc.setTextColor(28, 93, 153); // Azul Oscuro
@@ -1442,23 +1439,25 @@ function createInvoiceDocument(cobroId, previousState = {}) {
     doc.setFontSize(12);
     doc.setTextColor(0, 0, 0);
     
+    const rightX = 140; // Coordenada derecha para los campos
+    
     doc.text(`Recibo No: ${cobro.id.toUpperCase().substring(0, 8)}`, 10, y);
-    doc.text(`Fecha: ${cobro.date}`, rightX, y); // <--- CAMBIO A rightX
+    doc.text(`Fecha: ${cobro.date}`, rightX, y);
     y += 5;
 
     doc.text(`Cliente: ${client.name}`, 10, y);
-    doc.text(`Cédula: ${client.cedula || 'N/A'}`, rightX, y); // <--- CAMBIO A rightX
+    doc.text(`Cédula: ${client.cedula || 'N/A'}`, rightX, y);
     y += 5;
     
     doc.text(`Préstamo ID: ${loan.id.toUpperCase().substring(0, 8)}`, 10, y);
-    doc.text(`Cuota Mensual Fija: ${formatCurrency(cuotaMensual)}`, rightX, y); // <--- CAMBIO A rightX
+    doc.text(`Cuota Mensual Fija: ${formatCurrency(cuotaMensual)}`, rightX, y);
     y += 5;
     
     doc.text(`Monto Principal: ${formatCurrency(loan.amount)}`, 10, y);
-    doc.text(`Total a Pagar (Ppal + Int): ${formatCurrency(totalPagar)}`, rightX, y); // <--- CAMBIO A rightX
+    doc.text(`Total a Pagar (Ppal + Int): ${formatCurrency(totalPagar)}`, rightX, y);
     y += 8;
 
-    // --- TABLA DE DESGLOSE DE PAGO ---
+    // --- TABLA DE DESGLOSE DE PAGO (USANDO autoTable) ---
     let desgloseData = [
          // Si había mora, mostrarla
         ...(moraPagada > 0 ? [["Mora Atrasada Cubierta:", formatCurrency(moraPagada)]] : []),
@@ -1498,7 +1497,7 @@ function createInvoiceDocument(cobroId, previousState = {}) {
     
     y = doc.autoTable.previous.finalY + 5;
 
-    // --- TABLA DE SALDOS FINALES ---
+    // --- TABLA DE SALDOS FINALES (USANDO autoTable) ---
     const finalData = [
         ["Saldo Pendiente ANTES de este Pago:", formatCurrency(remainingBalanceBefore)],
         ["SALDO PENDIENTE DESPUÉS del Pago:", formatCurrency(remainingBalanceAfter)],
