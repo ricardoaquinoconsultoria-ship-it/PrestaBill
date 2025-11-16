@@ -1415,45 +1415,47 @@ function createInvoiceDocument(cobroId, previousState = {}) {
 
     // 3. Crear Documento PDF
     const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth(); // Para centrar elementos
     let y = 15; // Posición inicial Y
 
     // --- ENCABEZADO Y DATOS DE EMPRESA (Tú) ---
     doc.setFontSize(18);
     doc.setTextColor(28, 93, 153); // Azul Oscuro
-    doc.text("RECIBO DE PAGO", 105, y, null, null, "center");
+    doc.text("RECIBO DE PAGO", pageWidth / 2, y, { align: "center" });
     y += 10;
     
     doc.setFontSize(10);
     doc.setTextColor(51, 51, 51);
-    doc.text("Presta Bill S.A. (Sistema de Préstamos)", 105, y, null, null, "center");
+    doc.text("Presta Bill S.A. (Sistema de Préstamos)", pageWidth / 2, y, { align: "center" });
     y += 5;
-    doc.text("Tel: N/A - Dir: N/A", 105, y, null, null, "center");
+    doc.text("Tel: N/A - Dir: N/A", pageWidth / 2, y, { align: "center" });
     y += 10;
     
     // --- LÍNEA SEPARADORA ---
     doc.setDrawColor(200, 200, 200);
-    doc.line(10, y, 200, y);
+    doc.line(10, y, pageWidth - 10, y);
     y += 5;
 
-    // --- DETALLES DE LA TRANSACCIÓN y CLIENTE (Lado a Lado) ---
+    // --- DETALLES DE LA TRANSACCIÓN y CLIENTE (Lado a Lado - USANDO LAS COORDENADAS ORIGINALES) ---
     doc.setFontSize(12);
     doc.setTextColor(0, 0, 0);
     
-    const rightX = 140; // Coordenada derecha para los campos
+    const leftX = 10;
+    const rightX = pageWidth - 90; // Coordenada derecha para los campos
     
-    doc.text(`Recibo No: ${cobro.id.toUpperCase().substring(0, 8)}`, 10, y);
+    doc.text(`Recibo No: ${cobro.id.toUpperCase().substring(0, 8)}`, leftX, y);
     doc.text(`Fecha: ${cobro.date}`, rightX, y);
-    y += 5;
+    y += 6;
 
-    doc.text(`Cliente: ${client.name}`, 10, y);
+    doc.text(`Cliente: ${client.name}`, leftX, y);
     doc.text(`Cédula: ${client.cedula || 'N/A'}`, rightX, y);
-    y += 5;
+    y += 6;
     
-    doc.text(`Préstamo ID: ${loan.id.toUpperCase().substring(0, 8)}`, 10, y);
+    doc.text(`Préstamo ID: ${loan.id.toUpperCase().substring(0, 8)}`, leftX, y);
     doc.text(`Cuota Mensual Fija: ${formatCurrency(cuotaMensual)}`, rightX, y);
-    y += 5;
+    y += 6;
     
-    doc.text(`Monto Principal: ${formatCurrency(loan.amount)}`, 10, y);
+    doc.text(`Monto Principal: ${formatCurrency(loan.amount)}`, leftX, y);
     doc.text(`Total a Pagar (Ppal + Int): ${formatCurrency(totalPagar)}`, rightX, y);
     y += 8;
 
@@ -1463,6 +1465,7 @@ function createInvoiceDocument(cobroId, previousState = {}) {
         ...(moraPagada > 0 ? [["Mora Atrasada Cubierta:", formatCurrency(moraPagada)]] : []),
         ["Abono a Cuota Normal:", formatCurrency(abonoNormal)],
         ...(abonoProximaCuota > 0 ? [["Aporte Extra/Adelanto Cuota:", formatCurrency(abonoProximaCuota)]] : []),
+        // Línea divisoria en el desglose
         ["--------------------------------", "--------------------------------"],
         ["MONTO TOTAL DE ESTE COBRO:", formatCurrency(amountPaid)],
     ];
@@ -1535,7 +1538,7 @@ function createInvoiceDocument(cobroId, previousState = {}) {
     // --- PIE DE PÁGINA (Firma) ---
     y = doc.internal.pageSize.height - 30; // 30mm desde el fondo
     doc.line(70, y, 140, y);
-    doc.text('Firma/Sello de Presta Bill', 105, y + 5, null, null, "center");
+    doc.text('Firma/Sello de Presta Bill', pageWidth / 2, y + 5, { align: "center" });
 
     return { doc, clientName: client.name, cobroDate: cobro.date };
 }
