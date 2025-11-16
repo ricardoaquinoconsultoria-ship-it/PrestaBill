@@ -1671,37 +1671,32 @@ function createInvoiceDocument(cobroId, previousState = {}) {
     return { doc, clientName: client.name, cobroDate: cobro.date };
 }
 
-// FUNCIÓN: GENERAR Y DESCARGAR FACTURA PDF (CORREGIDA PARA GITHUB PAGES)
+// FUNCIÓN: GENERAR Y DESCARGAR FACTURA PDF (VERSIÓN SOLICITADA)
 function generateInvoicePDF(cobroId, previousState = {}) {
     const result = createInvoiceDocument(cobroId, previousState);
     if (!result) return;
 
     const { doc, clientName, cobroDate } = result;
 
-    // 4. Guardar PDF y emitir mensaje de descarga
     const fileName = `Factura_Cobro_${clientName.replace(/\s/g, '_')}_${cobroDate.replace(/\//g, '-')}.pdf`;
 
     try {
-        // GitHub Pages permite BLOB pero bloquea doc.save() en modales
-        const pdfBlob = doc.output('blob');
-        const url = URL.createObjectURL(pdfBlob);
+        // >>> ESTE MÉTODO FUNCIONA EN GITHUB PAGES EN TODOS LOS CELULARES <<<
+        const url = doc.output('bloburi');
 
         const a = document.createElement('a');
         a.href = url;
         a.download = fileName;
 
-        // Necesario para que funcione en algunos navegadores
         document.body.appendChild(a);
         a.click();
         a.remove();
 
-        URL.revokeObjectURL(url);
-
         showToast(`Factura descargada: ${fileName}`, 'info');
 
     } catch (err) {
-        console.error("Error al generar PDF:", err);
-        showToast("Error al descargar el PDF.", "error");
+        console.error("Error PDF:", err);
+        showToast("No se pudo descargar el PDF.", "error");
     }
 }
 
