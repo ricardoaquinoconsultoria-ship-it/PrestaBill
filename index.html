@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Presta Bill - Dashboard</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -53,13 +51,13 @@ header {
 
 /* SIDEBAR */
 aside {
-  width:100px; /* <--- MODIFICADO: Ancho reducido */
+  width:260px;
   background:#2c3e50; /* Color Sidebar (Gris Oscuro) */
   color:white;
   padding:10px 0; /* Padding ajustado */
   position:fixed;
   top:0; 
-  left:-100px; /* <--- MODIFICADO: Posición de cierre ajustada */
+  left:-260px; 
   height:100vh; 
   transition: left 0.3s ease;
   z-index:1001; 
@@ -89,11 +87,7 @@ aside.open { left:0; }
   background:#34495e; /* Hover más claro */
 } 
 /* MEJORA 4: Estilo para el botón activo (opcional) */
-.nav-btn.active { 
-    background:#1c5d99; /* Color de acento */
-    font-weight: 700;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-}
+/* .nav-btn.active { background:#1c5d99; } */
 
 /* MAIN */
 main {
@@ -136,7 +130,7 @@ main {
 }
 
 /* CONTENEDOR DE CLIENTES Y PRESTAMOS */
-#clients-list, #loans-list-container {
+#clients-list, #loans-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Min-width un poco más grande */
   gap: 20px; 
@@ -207,10 +201,7 @@ table th {
 
 /* MEJORA 10: Cursor Pointer para Feedback UX */
 table tr:not(.neutral-header) {
-    cursor: default; /* Por defecto sin puntero */
-}
-table tr[ondblclick]:not(.neutral-header) {
-    cursor: pointer; /* Solo las filas con doble click */
+    cursor: pointer;
 }
 table tr:not(.neutral-header):hover {
     background: #e9eff5 !important;
@@ -320,8 +311,8 @@ table tr:not(.neutral-header):hover {
 /* MEJORA RESPONSIVE: PARA VISTAS GRANDES (desktop), mantener el layout shifted */
 @media (min-width: 768px) {
     main.shifted { 
-        /* <--- MODIFICADO: Ahora el margen es 100px para que el main se mueva más a la izquierda */
-        margin-left: 100px; 
+        /* En desktop, aplicar el margen cuando el menú está abierto */
+        margin-left: 260px; 
     }
 }
 </style>
@@ -340,14 +331,14 @@ table tr:not(.neutral-header):hover {
 
 <aside id="sidebar">
     <h3 style="padding:15px; margin:0; text-align:center; color:#fff; border-bottom:1px solid #34495e;">Menú Principal</h3>
-  <button class="nav-btn" data-view="dashboard" type="button" onclick="renderDashboard(); closeSidebar();">🏠 Inicio</button>
-  <button class="nav-btn" data-view="clients" type="button" onclick="renderClients(); closeSidebar();">👥 Clientes</button>
-  <button class="nav-btn" data-view="loans" type="button" onclick="renderLoans(); closeSidebar();">💵 Préstamos</button>
-  <button class="nav-btn" data-view="cobros" type="button" onclick="renderCobros(); closeSidebar();">💰 Cobros</button>
-  <button class="nav-btn" data-view="reports" type="button" onclick="renderReports(); closeSidebar();">📊 Reportes</button>
-  <button class="nav-btn" data-view="history" type="button" onclick="renderCobrosHistory(); closeSidebar();">📜 Historial Transacciones</button>
-  <button class="nav-btn" data-view="settings" type="button" onclick="renderSettings(); closeSidebar();">⚙️ Configuraciones</button>
-  <button class="nav-btn" data-view="maintenance" type="button" onclick="renderMaintenance(); closeSidebar();">💾 Mantenimiento</button> 
+  <button class="nav-btn" type="button" onclick="renderDashboard(); closeSidebar();">🏠 Inicio</button>
+  <button class="nav-btn" type="button" onclick="renderClients(); closeSidebar();">👥 Clientes</button>
+  <button class="nav-btn" type="button" onclick="renderLoans(); closeSidebar();">💵 Préstamos</button>
+  <button class="nav-btn" type="button" onclick="renderCobros(); closeSidebar();">💰 Cobros</button>
+  <button class="nav-btn" type="button" onclick="renderReports(); closeSidebar();">📊 Reportes</button>
+  <button class="nav-btn" type="button" onclick="renderCobrosHistory(); closeSidebar();">📜 Historial Transacciones</button>
+  <button class="nav-btn" type="button" onclick="renderSettings(); closeSidebar();">⚙️ Configuraciones</button>
+  <button class="nav-btn" type="button" onclick="renderMaintenance(); closeSidebar();">💾 Mantenimiento</button> 
 </aside>
 
 <main id="main"></main>
@@ -419,16 +410,6 @@ function formatCurrency(amount) {
 // ===============================================
 // LÓGICA DE INTERFAZ (AJUSTADA)
 // ===============================================
-// 💡 MEJORA 4: Función para marcar el botón de navegación activo
-function setActiveNavButton(viewName) {
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.getAttribute('data-view') === viewName) {
-            btn.classList.add('active');
-        }
-    });
-}
-
 menuToggle.onclick = () => {
   const isOpening = !sidebar.classList.contains("open");
   
@@ -472,13 +453,11 @@ function calculateLoanPortfolioSummary() {
     let netBalancePending = 0; // Principal + Interés
     let moraAmount = 0;
     let totalPrincipalLent = 0;
-    let totalInterestIncome = 0; // 💡 MEJORA: Cálculo de ingresos por interés
 
     for (const loan of allLoans) {
         // 1. Calcular el total a pagar (Principal + Interés)
         const totalPagar = Number(loan.amount) + Number(loan.totalInterest);
         totalPrincipalLent += Number(loan.amount);
-        totalInterestIncome += Number(loan.totalInterest); // Suma todo el interés potencial
 
         // 2. Monto pagado hasta la fecha
         const totalPaidAmount = allCobros
@@ -493,52 +472,30 @@ function calculateLoanPortfolioSummary() {
         }
 
         // 4. Calcular Mora
-        // Se usa un mock del préstamo para calcular la mora
-        const risk = calculateLoanRisk({ 
-            ...loan, 
-            totalPaidAmount: totalPaidAmount, 
-            paymentsMade: Math.floor(totalPaidAmount / Number(loan.monthlyPayment)),
-            status: remainingBalance > 0.01 ? 'Activo' : 'Pagado'
-        });
-        
+        const risk = calculateLoanRisk(loan);
         if (risk.monthsBehind > 0) {
             // Usamos el total adeudado por cuotas vencidas y no pagadas
             moraAmount += risk.totalDue; 
         }
     }
 
-    return { netBalancePending, moraAmount, totalPrincipalLent, totalInterestIncome };
+    return { netBalancePending, moraAmount, totalPrincipalLent };
 }
 
 
 function renderDashboard(){
-  setActiveNavButton('dashboard'); // MEJORA 4
   const clients = DB.get("clients").length;
   const cobros = DB.getInitialCobros(); 
   
   // 1. CÁLCULO DE GANANCIAS
-  const totalCobrado = cobros.reduce((a,b)=> a+Number(b.amount),0); 
+  const totalGanancias = cobros.reduce((a,b)=> a+Number(b.amount),0); 
 
   // 2. CÁLCULO DE SALDO PENDIENTE NETO Y MORA 
   const summary = calculateLoanPortfolioSummary();
   const netBalancePending = summary.netBalancePending; 
-  const totalInterestIncome = summary.totalInterestIncome; // 💡 MEJORA: Nuevo campo
-
+  
   const allLoans = DB.get("loans");
-  // Determinar préstamos en mora usando el risk calculator
-  const loansInMora = allLoans.filter(l => {
-    const totalPagar = Number(l.amount) + Number(l.totalInterest);
-    const totalPaidAmount = cobros
-        .filter(c => c.loanId === l.id)
-        .reduce((sum, current) => sum + Number(current.amount), 0);
-        
-    return calculateLoanRisk({ 
-        ...l, 
-        totalPaidAmount: totalPaidAmount, 
-        paymentsMade: Math.floor(totalPaidAmount / Number(l.monthlyPayment)),
-        status: (totalPagar - totalPaidAmount) > 0.01 ? 'Activo' : 'Pagado'
-    }).monthsBehind > 0;
-  }); 
+  const loansInMora = allLoans.filter(l => calculateLoanRisk(l).monthsBehind > 0); 
 
   main.innerHTML = `
     <h2>Resumen de Préstamos 📈</h2>
@@ -551,21 +508,15 @@ function renderDashboard(){
         </div>
         
         <div class="card" style="border-left: 5px solid #2ecc71;">
-            <h3>Monto Cobrado</h3>
-            <p style="font-size:36px; font-weight:bold;">${formatCurrency(totalCobrado)}</p>
+            <h3>Ganancias Recibidas</h3>
+            <p style="font-size:36px; font-weight:bold;">${formatCurrency(totalGanancias)}</p>
             <p style="margin:0; font-size:0.9em; color:#888;">Monto total de cobros históricos.</p>
         </div>
 
         <div class="card" style="border-left: 5px solid #1c5d99;">
-            <h3>Potencial de Ingreso Total</h3>
+            <h3>Potencial de Ingreso</h3>
             <p style="font-size:36px; font-weight:bold;">${formatCurrency(netBalancePending)}</p>
             <p style="margin:0; font-size:0.9em; color:#888;">Total (Ppal + Interés) por cobrar.</p>
-        </div>
-        
-        <div class="card" style="border-left: 5px solid #8e44ad;">
-            <h3>Interés Potencial</h3>
-            <p style="font-size:36px; font-weight:bold;">${formatCurrency(totalInterestIncome)}</p>
-            <p style="margin:0; font-size:0.9em; color:#888;">Total de intereses si todos pagan.</p>
         </div>
         
         <div class="card" style="border-left: 5px solid ${loansInMora.length > 0 ? '#e74c3c' : '#2ecc71'};">
@@ -575,13 +526,6 @@ function renderDashboard(){
             </p>
             <p style="margin:0; font-size:0.9em; color:#888;">Préstamos con 1+ cuota de atraso.</p>
         </div>
-        
-        <div class="card" style="border-left: 5px solid #f39c12;">
-            <h3>Monto en Mora</h3>
-            <p style="font-size:36px; font-weight:bold; color:#e74c3c;">${formatCurrency(summary.moraAmount)}</p>
-            <p style="margin:0; font-size:0.9em; color:#888;">Monto adeudado por cuotas vencidas.</p>
-        </div>
-        
     </div>
 
     <h3>Distribución de Capital Prestado</h3>
@@ -594,7 +538,6 @@ function renderDashboard(){
   
   renderLoanDistributionChart();
 }
-
 
 function renderLoanDistributionChart() {
     const loans = DB.get("loans");
@@ -662,7 +605,6 @@ function calculateTotalLoanAmount(clientId) {
 // VISTA: CLIENTES
 // ===============================================
 function renderClients(){
-    setActiveNavButton('clients'); // MEJORA 4
   main.innerHTML = `
     <h2>Clientes 👥</h2>
     <div style="margin-bottom:20px;">
@@ -875,7 +817,6 @@ function saveClient(id) {
 // ===============================================
 
 function renderLoans() {
-    setActiveNavButton('loans'); // MEJORA 4
     const settings = DB.getSettings();
   main.innerHTML = `
     <h2>Préstamos 💵</h2>
@@ -904,7 +845,7 @@ function renderLoans() {
     
     <div style="margin-top:20px;">
         <h3>Préstamos Activos y Pagados</h3>
-        <div id="loans-list-container">
+        <div id="loans-list">
             </div>
     </div>
   `;
@@ -1024,9 +965,6 @@ function deleteLoan(id) {
     if (document.getElementById('pending-payments-list')) {
         refreshPendingPayments();
     }
-    if (document.getElementById('cobros-history-list')) {
-        refreshCobrosHistory();
-    }
 
     alert("Préstamo y sus cobros asociados eliminados correctamente.");
 }
@@ -1058,9 +996,10 @@ function calculateLoanRisk(loan) {
 
         // Ajuste para mantener el día de inicio
         if (startDate.getDate() !== dueDate.getDate()) {
+            // Ajustar al último día del mes si es necesario
+            dueDate.setDate(0); 
+            dueDate.setDate(startDate.getDate()); 
             // Esto es solo un ajuste para mantener la lógica de "día de pago" consistente
-            let lastDay = new Date(dueDate.getFullYear(), dueDate.getMonth() + 1, 0).getDate();
-            dueDate.setDate(Math.min(startDate.getDate(), lastDay)); 
         }
 
         // Si la fecha de vencimiento es HOY o en el PASADO (consideramos HOY vencido)
@@ -1099,28 +1038,8 @@ function calculateLoanRisk(loan) {
 // ===============================================
 
 function refreshLoanList() {
-    const allCobros = DB.getInitialCobros();
-    const loans = DB.get("loans").map(l => {
-        const totalPagar = Number(l.amount) + Number(l.totalInterest);
-        const totalPaidAmount = allCobros
-            .filter(c => c.loanId === l.id)
-            .reduce((sum, current) => sum + Number(current.amount), 0);
-        
-        // Crear un mock para el cálculo de riesgo
-        const loanWithPaidInfo = {
-            ...l,
-            totalPaidAmount: totalPaidAmount,
-            paymentsMade: Math.floor(totalPaidAmount / Number(l.monthlyPayment)),
-            status: (totalPagar - totalPaidAmount) > 0.01 ? 'Activo' : 'Pagado'
-        };
-        
-        return {
-            ...loanWithPaidInfo,
-            risk: calculateLoanRisk(loanWithPaidInfo)
-        };
-    });
-    
-    const box = document.getElementById("loans-list-container"); 
+    const loans = DB.get("loans");
+    const box = document.getElementById("loans-list");
     
     if (loans.length === 0) {
         box.innerHTML = '<p style="text-align:center;">No hay préstamos activos registrados.</p>';
@@ -1130,7 +1049,7 @@ function refreshLoanList() {
     const tableRows = loans.map(l => {
         const totalPagar = Number(l.amount) + Number(l.totalInterest);
         const paidPercentage = (l.totalPaidAmount / totalPagar) * 100;
-        const risk = l.risk;
+        const risk = calculateLoanRisk(l);
         const statusColor = risk.monthsBehind > 0 ? '#e74c3c' : (l.status === 'Pagado' ? '#2ecc71' : '#f39c12');
         const statusText = risk.monthsBehind > 0 ? `Mora (${risk.monthsBehind} meses)` : l.status;
         const progressStyle = paidPercentage > 100 ? 100 : paidPercentage;
@@ -1176,17 +1095,14 @@ function refreshLoanList() {
             </div>
         `;
     }).join("");
-    // 💡 MEJORA: Eliminación de la re-creación del div "loans-list" (se usa loans-list-container)
-    box.innerHTML = tableRows; 
+    box.innerHTML = `<div id="loans-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">${tableRows}</div>`;
 }
-
 
 // ===============================================
 // VISTA: COBROS (PAGOS)
 // ===============================================
 
 function renderCobros(loanIdToSelect = null) {
-    setActiveNavButton('cobros'); // MEJORA 4
     const settings = DB.getSettings();
     main.innerHTML = `
         <h2>Registro de Cobros 💰</h2>
@@ -1243,10 +1159,7 @@ function populateLoanSelect(loanIdToSelect) {
     
     loans.forEach(l => {
         const totalPagar = Number(l.amount) + Number(l.totalInterest);
-        const totalPaidAmount = DB.getInitialCobros()
-            .filter(c => c.loanId === l.id)
-            .reduce((sum, current) => sum + Number(current.amount), 0);
-        const remaining = totalPagar - totalPaidAmount;
+        const remaining = totalPagar - Number(l.totalPaidAmount);
 
         const option = document.createElement('option');
         option.value = l.id;
@@ -1303,27 +1216,11 @@ function updatePaymentDetails() {
 
     const loan = DB.get("loans").find(l => l.id === loanId);
     if (!loan) return;
-    
-    // Recalcular el total pagado hasta la fecha (porque la info del loan puede estar desactualizada)
-    const totalPaidAmount = DB.getInitialCobros()
-        .filter(c => c.loanId === loan.id)
-        .reduce((sum, current) => sum + Number(current.amount), 0);
-        
-    const paymentsMade = Math.floor(totalPaidAmount / Number(loan.monthlyPayment));
-        
-    // Crear un mock del loan para el cálculo de riesgo
-    const loanMock = {
-        ...loan, 
-        totalPaidAmount: totalPaidAmount,
-        paymentsMade: paymentsMade,
-        status: 'Activo' // Asumir activo a menos que el restante sea 0
-    };
-
 
     const totalPagar = Number(loan.amount) + Number(loan.totalInterest);
-    const remainingBalance = totalPagar - totalPaidAmount;
+    const remainingBalance = totalPagar - Number(loan.totalPaidAmount);
     const cuotaMensual = Number(loan.monthlyPayment);
-    const risk = calculateLoanRisk(loanMock);
+    const risk = calculateLoanRisk(loan);
     
     let moraText = '';
     
@@ -1361,25 +1258,22 @@ function registerPayment() {
 
     const loan = allLoans[loanIndex];
     const totalPagar = Number(loan.amount) + Number(loan.totalInterest);
-    
-    // *** Calcular el estado actual ANTES de este nuevo cobro (usando el historial de cobros) ***
-    const allCobros = DB.getInitialCobros();
-    const oldTotalPaidAmount = allCobros
-        .filter(c => c.loanId === loan.id)
-        .reduce((sum, current) => sum + Number(current.amount), 0);
-        
-    const remainingBalance = totalPagar - oldTotalPaidAmount;
+    const remainingBalance = totalPagar - Number(loan.totalPaidAmount);
     const cuotaMensual = Number(loan.monthlyPayment);
-    const oldPaymentsMade = Math.floor(oldTotalPaidAmount / cuotaMensual); // Cuotas pagadas antes de este cobro
-    // ********************************************************************************************
-
+    
     if (amount > remainingBalance + 0.01) { // Añadir un pequeño margen por errores de coma flotante
         if (!confirm(`El monto de ${formatCurrency(amount)} es mayor al saldo pendiente (${formatCurrency(remainingBalance)}). ¿Desea registrar el pago igual? El saldo restante se ajustará a cero.`)) {
             return;
         }
     }
     
-    // 1. Registrar el cobro
+    // 1. Guardar el estado ANTES del nuevo cobro para el cálculo de la factura
+    const oldTotalPaidAmount = Number(loan.totalPaidAmount);
+    // Calcular paymentsMadeBefore basado en el total pagado antes del cobro actual
+    const oldPaymentsMade = Math.floor(oldTotalPaidAmount / cuotaMensual);
+
+    // 2. Registrar el cobro
+    let allCobros = DB.getInitialCobros();
     const newCobro = {
         id: genId(),
         loanId: loanId,
@@ -1391,11 +1285,11 @@ function registerPayment() {
     allCobros.push(newCobro);
     DB.set("cobros", allCobros);
 
-    // 2. Actualizar el préstamo (Solo para mantener los campos en el loan actualizados, aunque el historial es la fuente de verdad)
+    // 3. Actualizar el préstamo
     loan.totalPaidAmount = oldTotalPaidAmount + amount;
     loan.paymentsMade = Math.floor(loan.totalPaidAmount / cuotaMensual);
 
-    // 3. Revisar el estado
+    // 4. Revisar el estado
     const newRemaining = totalPagar - loan.totalPaidAmount;
     if (newRemaining <= 0.01) { 
         loan.status = 'Pagado';
@@ -1414,8 +1308,8 @@ function registerPayment() {
     if (confirm("Cobro exitoso. ¿Desea ver y descargar la factura del pago en PDF?")) {
         // Enviar el ID del cobro recién creado y el estado anterior
         viewInvoicePDF(newCobro.id, {
-            oldTotalPaidAmount: oldTotalPaidAmount,
-            oldPaymentsMade: oldPaymentsMade
+            oldTotalPaidAmount,
+            oldPaymentsMade
         }); 
     }
     // **********************************************
@@ -1427,59 +1321,6 @@ function registerPayment() {
     populateLoanSelect();
     populateCobroSelectForInvoice(); // Refrescar el select de factura
     refreshPendingPayments();
-}
-
-// MEJORA 12: FUNCIÓN DE ELIMINACIÓN DE COBRO (CASCADA)
-function deleteCobro(cobroId) {
-    if (!confirm("ADVERTENCIA: ¿Está seguro de que desea eliminar este cobro? Esto ajustará los saldos del préstamo asociado.")) return;
-
-    let allCobros = DB.getInitialCobros();
-    const cobroIndex = allCobros.findIndex(c => c.id === cobroId);
-    if (cobroIndex === -1) return;
-    
-    const cobroToDelete = allCobros[cobroIndex];
-    allCobros.splice(cobroIndex, 1);
-    DB.set("cobros", allCobros);
-    
-    // 1. Recalcular el estado del Préstamo afectado
-    let allLoans = DB.get("loans");
-    const loanIndex = allLoans.findIndex(l => l.id === cobroToDelete.loanId);
-    
-    if (loanIndex !== -1) {
-        const loan = allLoans[loanIndex];
-        const totalPagar = Number(loan.amount) + Number(loan.totalInterest);
-        const cuotaMensual = Number(loan.monthlyPayment);
-        
-        // Recalcular el total pagado sumando todos los cobros restantes de ese préstamo
-        const newTotalPaidAmount = allCobros
-            .filter(c => c.loanId === loan.id)
-            .reduce((sum, current) => sum + Number(current.amount), 0);
-
-        loan.totalPaidAmount = newTotalPaidAmount;
-        loan.paymentsMade = Math.floor(newTotalPaidAmount / cuotaMensual);
-
-        // Revisar el nuevo estado
-        const newRemaining = totalPagar - loan.totalPaidAmount;
-        if (newRemaining > 0.01) { 
-            loan.status = 'Activo';
-        } else {
-             loan.status = 'Pagado'; 
-             loan.totalPaidAmount = totalPagar;
-             loan.paymentsMade = Number(loan.termMonths);
-        }
-        
-        allLoans[loanIndex] = loan;
-        DB.set("loans", allLoans);
-    }
-
-    refreshCobrosHistory(); 
-    
-    // Si la vista de Cobros está abierta, refrescarla también
-    if (document.getElementById('pending-payments-list')) {
-        refreshPendingPayments();
-    }
-    
-    alert("Cobro eliminado y saldo de préstamo ajustado correctamente.");
 }
 
 // ===============================================
@@ -1539,12 +1380,10 @@ function createInvoiceDocument(cobroId, previousState = {}) {
     const remainingBalanceBefore = totalPagar - totalPaidBefore; 
     
     // Recalcular la mora ANTES de este cobro para el desglose (basado en el estado ANTES)
-    // 💡 MEJORA: Usar una versión mock del préstamo para el cálculo de riesgo retroactivo
     const oldRisk = calculateLoanRisk({ 
         ...loan, 
         totalPaidAmount: totalPaidBefore, 
-        paymentsMade: paymentsMadeBefore,
-        status: remainingBalanceBefore > 0.01 ? 'Activo' : 'Pagado'
+        paymentsMade: paymentsMadeBefore 
     });
     
     // Cuanto de lo pagado cubrió la mora que había
@@ -1578,6 +1417,9 @@ function createInvoiceDocument(cobroId, previousState = {}) {
     const doc = new jsPDF();
     let y = 15; // Posición inicial Y
 
+    // Nueva posición horizontal para la columna derecha
+    const rightX = 115;   // Antes era 140, ahora está más al centro
+
     // --- ENCABEZADO Y DATOS DE EMPRESA (Tú) ---
     doc.setFontSize(18);
     doc.setTextColor(28, 93, 153); // Azul Oscuro
@@ -1601,19 +1443,19 @@ function createInvoiceDocument(cobroId, previousState = {}) {
     doc.setTextColor(0, 0, 0);
     
     doc.text(`Recibo No: ${cobro.id.toUpperCase().substring(0, 8)}`, 10, y);
-    doc.text(`Fecha: ${cobro.date}`, 140, y);
+    doc.text(`Fecha: ${cobro.date}`, rightX, y); // <--- CAMBIO A rightX
     y += 5;
 
     doc.text(`Cliente: ${client.name}`, 10, y);
-    doc.text(`Cédula: ${client.cedula || 'N/A'}`, 140, y);
+    doc.text(`Cédula: ${client.cedula || 'N/A'}`, rightX, y); // <--- CAMBIO A rightX
     y += 5;
     
     doc.text(`Préstamo ID: ${loan.id.toUpperCase().substring(0, 8)}`, 10, y);
-    doc.text(`Cuota Mensual Fija: ${formatCurrency(cuotaMensual)}`, 140, y);
+    doc.text(`Cuota Mensual Fija: ${formatCurrency(cuotaMensual)}`, rightX, y); // <--- CAMBIO A rightX
     y += 5;
     
     doc.text(`Monto Principal: ${formatCurrency(loan.amount)}`, 10, y);
-    doc.text(`Total a Pagar (Ppal + Int): ${formatCurrency(totalPagar)}`, 140, y);
+    doc.text(`Total a Pagar (Ppal + Int): ${formatCurrency(totalPagar)}`, rightX, y); // <--- CAMBIO A rightX
     y += 8;
 
     // --- TABLA DE DESGLOSE DE PAGO ---
@@ -1756,17 +1598,7 @@ function downloadInvoice() {
 
 
 function refreshPendingPayments() {
-    const allCobros = DB.getInitialCobros();
-    const allLoans = DB.get("loans").filter(l => {
-        // Recalcular el saldo
-        const totalPagar = Number(l.amount) + Number(l.totalInterest);
-        const totalPaidAmount = allCobros
-            .filter(c => c.loanId === l.id)
-            .reduce((sum, current) => sum + Number(current.amount), 0);
-            
-        return (totalPagar - totalPaidAmount) > 0.01; // Mostrar si el restante es > 0.01
-    });
-
+    const allLoans = DB.get("loans").filter(l => l.status !== 'Pagado');
     const box = document.getElementById("pending-payments-list");
 
     if (allLoans.length === 0) {
@@ -1775,21 +1607,9 @@ function refreshPendingPayments() {
     }
 
     const tableRows = allLoans.map((l, index) => {
-        // Recalcular para la visualización
+        const risk = calculateLoanRisk(l);
         const totalPagar = Number(l.amount) + Number(l.totalInterest);
-        const totalPaidAmount = allCobros
-            .filter(c => c.loanId === l.id)
-            .reduce((sum, current) => sum + Number(current.amount), 0);
-        const remainingBalance = totalPagar - totalPaidAmount;
-        const paymentsMade = Math.floor(totalPaidAmount / Number(l.monthlyPayment));
-        
-        const loanMock = {
-            ...l, 
-            totalPaidAmount: totalPaidAmount,
-            paymentsMade: paymentsMade,
-            status: 'Activo'
-        };
-        const risk = calculateLoanRisk(loanMock);
+        const remainingBalance = totalPagar - Number(l.totalPaidAmount);
         
         const moraClass = risk.monthsBehind > 0 ? 'mora-alert-text' : '';
         const moraText = risk.monthsBehind > 0 ? `${risk.monthsBehind} Meses` : 'Al día';
@@ -1805,9 +1625,9 @@ function refreshPendingPayments() {
                     updatePaymentDetails();
                     document.getElementById('payment-amount').scrollIntoView({ behavior: 'smooth', block: 'center' }); 
                     document.getElementById('payment-amount').focus();" 
-                >
+                style="cursor:pointer;">
                 <td class="client-loan-cell">${l.clientName}</td>
-                <td>${paymentsMade}/${l.termMonths}</td>
+                <td>${l.paymentsMade}/${l.termMonths}</td>
                 <td>${nextDueText}</td>
                 <td>${formatCurrency(remainingBalance)}</td>
                 <td class="${moraClass}">${moraText}</td>
@@ -1852,7 +1672,6 @@ function refreshPendingPayments() {
 // VISTA: HISTORIAL DE COBROS
 // ===============================================
 function renderCobrosHistory() {
-    setActiveNavButton('history'); // MEJORA 4
     main.innerHTML = `
         <h2>Historial de Transacciones (Cobros) 📜</h2>
         <div id="cobros-history-list"></div>
@@ -1900,6 +1719,59 @@ function refreshCobrosHistory() {
         </div>
     `;
 }
+
+// MEJORA 12: FUNCIÓN DE ELIMINACIÓN DE COBRO (CASCADA)
+function deleteCobro(cobroId) {
+    if (!confirm("ADVERTENCIA: ¿Está seguro de que desea eliminar este cobro? Esto ajustará los saldos del préstamo asociado.")) return;
+
+    let allCobros = DB.getInitialCobros();
+    const cobroIndex = allCobros.findIndex(c => c.id === cobroId);
+    if (cobroIndex === -1) return;
+    
+    const cobroToDelete = allCobros[cobroIndex];
+    allCobros.splice(cobroIndex, 1);
+    DB.set("cobros", allCobros);
+    
+    // 1. Recalcular el estado del Préstamo afectado
+    let allLoans = DB.get("loans");
+    const loanIndex = allLoans.findIndex(l => l.id === cobroToDelete.loanId);
+    
+    if (loanIndex !== -1) {
+        const loan = allLoans[loanIndex];
+        const totalPagar = Number(loan.amount) + Number(loan.totalInterest);
+        const cuotaMensual = Number(loan.monthlyPayment);
+        
+        // Recalcular el total pagado sumando todos los cobros restantes de ese préstamo
+        const newTotalPaidAmount = allCobros
+            .filter(c => c.loanId === loan.id)
+            .reduce((sum, current) => sum + Number(current.amount), 0);
+
+        loan.totalPaidAmount = newTotalPaidAmount;
+        loan.paymentsMade = Math.floor(newTotalPaidAmount / cuotaMensual);
+
+        // Revisar el nuevo estado
+        const newRemaining = totalPagar - loan.totalPaidAmount;
+        if (newRemaining > 0.01) { 
+            loan.status = 'Activo';
+        } else {
+             loan.status = 'Pagado'; 
+             loan.totalPaidAmount = totalPagar;
+             loan.paymentsMade = Number(loan.termMonths);
+        }
+        
+        allLoans[loanIndex] = loan;
+        DB.set("loans", allLoans);
+    }
+
+    refreshCobrosHistory(); 
+    
+    // Si la vista de Cobros está abierta, refrescarla también
+    if (document.getElementById('pending-payments-list')) {
+        refreshPendingPayments();
+    }
+    
+    alert("Cobro eliminado y saldo de préstamo ajustado correctamente.");
+}
 // ===============================================
 
 
@@ -1907,7 +1779,6 @@ function refreshCobrosHistory() {
 // VISTA: REPORTES (SIN BLOQUEO PREMIUM)
 // ===============================================
 function renderReports() {
-    setActiveNavButton('reports'); // MEJORA 4
     
     const summary = calculateLoanPortfolioSummary();
     
@@ -1954,14 +1825,7 @@ function renderClientRanking() {
             };
         }
         clientRanking[loan.clientId].totalAmount += Number(loan.amount);
-        // Recalcular estado para el conteo de activos
-        const allCobros = DB.getInitialCobros();
-        const totalPagar = Number(loan.amount) + Number(loan.totalInterest);
-        const totalPaidAmount = allCobros
-            .filter(c => c.loanId === loan.id)
-            .reduce((sum, current) => sum + Number(current.amount), 0);
-            
-        if ((totalPagar - totalPaidAmount) > 0.01) {
+        if (loan.status === 'Activo') {
             clientRanking[loan.clientId].activeLoans += 1;
         }
     });
@@ -2003,34 +1867,9 @@ function renderClientRanking() {
 }
 
 function renderMoraLoansDetail() {
-    const allCobros = DB.getInitialCobros();
     const allLoans = DB.get("loans");
-    
     const loansInMora = allLoans
-        .map(l => {
-            // Recalcular el estado para el cálculo de riesgo
-            const totalPagar = Number(l.amount) + Number(l.totalInterest);
-            const totalPaidAmount = allCobros
-                .filter(c => c.loanId === l.id)
-                .reduce((sum, current) => sum + Number(current.amount), 0);
-                
-            const paymentsMade = Math.floor(totalPaidAmount / Number(l.monthlyPayment));
-            
-            const loanMock = {
-                ...l, 
-                totalPaidAmount: totalPaidAmount,
-                paymentsMade: paymentsMade,
-                status: (totalPagar - totalPaidAmount) > 0.01 ? 'Activo' : 'Pagado'
-            };
-            
-            return { 
-                ...l, 
-                risk: calculateLoanRisk(loanMock),
-                totalPaidAmount: totalPaidAmount,
-                paymentsMade: paymentsMade,
-                totalPagar: totalPagar
-            };
-        })
+        .map(l => ({ ...l, risk: calculateLoanRisk(l) }))
         .filter(l => l.risk.monthsBehind > 0)
         .sort((a, b) => b.risk.monthsBehind - a.risk.monthsBehind); // El que más debe primero
 
@@ -2042,7 +1881,8 @@ function renderMoraLoansDetail() {
     }
     
     const tableRows = loansInMora.map((l, index) => {
-        const remainingBalance = l.totalPagar - Number(l.totalPaidAmount);
+        const totalPagar = Number(l.amount) + Number(l.totalInterest);
+        const remainingBalance = totalPagar - Number(l.totalPaidAmount);
         
         return `
             <tr class="${index % 2 === 0 ? 'neutral-row-even' : 'neutral-row-odd'}">
@@ -2077,7 +1917,6 @@ function renderMoraLoansDetail() {
 // VISTA: CONFIGURACIONES
 // ===============================================
 function renderSettings() {
-    setActiveNavButton('settings'); // MEJORA 4
     const settings = DB.getSettings();
     main.innerHTML = `
         <h2>Configuraciones Globales ⚙️</h2>
@@ -2118,7 +1957,6 @@ function saveSettings() {
 // VISTA: MANTENIMIENTO
 // ===============================================
 function renderMaintenance() {
-    setActiveNavButton('maintenance'); // MEJORA 4
     main.innerHTML = `
         <h2>Mantenimiento y Respaldo 💾</h2>
         
