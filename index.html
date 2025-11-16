@@ -10,22 +10,21 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
 
 <style>
-/* 1. Resetear el Box Sizing para mejor consistencia */
+/* ... (Mismos estilos CSS que ya tenías) ... */
+
 *, *::before, *::after {
   box-sizing: border-box; 
 }
 
 body { 
   margin:0; 
-  /* MEJORA 1: Tipografía y color de fondo más suaves */
   font-family: 'Roboto', sans-serif; 
-  background:#f9f9f9; /* Fondo más claro */
+  background:#f9f9f9; 
   color: #333;
 }
 
-/* HEADER - FIJO AL 100% */
 header { 
-  background:#1c5d99; /* Color más profesional (Azul Oscuro) */
+  background:#1c5d99; 
   color:white; 
   padding:15px; 
   font-size:24px; 
@@ -37,7 +36,6 @@ header {
   top:0; 
   width:100%; 
   left: 0;
-  /* MEJORA 2: Sombra en el Header */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -49,12 +47,11 @@ header {
 }
 #menu-toggle:hover { opacity: 0.8; }
 
-/* SIDEBAR */
 aside {
   width:260px;
-  background:#2c3e50; /* Color Sidebar (Gris Oscuro) */
+  background:#2c3e50; 
   color:white;
-  padding:10px 0; /* Padding ajustado */
+  padding:10px 0; 
   position:fixed;
   top:0; 
   left:-260px; 
@@ -63,16 +60,14 @@ aside {
   z-index:1001; 
   box-sizing: border-box;
   overflow-y: auto; 
-  /* MEJORA 3: Sombra para el Sidebar abierto */
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
 }
 aside.open { left:0; }
 
-/* NAV BUTTONS */
 .nav-btn { 
   width:calc(100% - 20px); 
   background:transparent; 
-  padding:12px 15px; /* Más padding */
+  padding:12px 15px; 
   border:none; 
   color:white; 
   margin:5px 10px; 
@@ -84,22 +79,19 @@ aside.open { left:0; }
   font-weight: 400;
 }
 .nav-btn:hover { 
-  background:#34495e; /* Hover más claro */
+  background:#34495e; 
 } 
-/* .nav-btn.active { background:#1c5d99; } */
 
-/* === ESTILOS DEL BOTÓN DE SUSCRIPCIÓN (ADAPTADO AL MENÚ) === */
 .btn-suscripcion {
-    /* Modificado para integrarse al look and feel del menú, pero destacando */
     width:calc(100% - 20px); 
-    background-color: #2ecc71; /* Verde llamativo */
+    background-color: #2ecc71; 
     color: white;
     padding: 12px 15px;
     border: none;
     border-radius: 6px;
     font-size: 16px;
     cursor: pointer;
-    margin: 5px 10px 10px 10px; /* Margen para separarlo abajo del menú */
+    margin: 5px 10px 10px 10px; 
     text-align: center;
     font-weight: bold;
     transition: background 0.3s;
@@ -107,38 +99,30 @@ aside.open { left:0; }
 .btn-suscripcion:hover {
     background-color: #27ae60;
 }
-/* ========================================================== */
 
-
-/* MAIN */
 main {
-  padding: 90px 20px 20px 20px; /* Ajuste para header de 60px */
+  padding: 90px 20px 20px 20px; 
   margin-left: 0; 
   transition: margin-left 0.3s ease;
   width: auto; 
 }
 
-/* TARJETAS - Se agrega sombra moderna */
 .card { 
   background:white; 
-  padding:20px; /* Más padding */
+  padding:20px; 
   border-radius:10px; 
   margin-bottom:20px; 
   min-height: 100px;
-  border: 1px solid #e0e0e0; /* Borde más suave */
-  /* MEJORA 5: Sombra suave */
+  border: 1px solid #e0e0e0; 
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); 
-  /* MEJORA 8: Transición para feedback visual de tarjeta */
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; 
 }
-/* MEJORA 8: Efecto de hover */
 .card:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
 
 
-/* DASHBOARD CARDS CONTAINER (para la distribución) */
 .dashboard-cards-container {
     display:flex; 
     gap:20px; 
@@ -150,30 +134,26 @@ main {
     margin-bottom: 0; 
 }
 
-/* CONTENEDOR DE CLIENTES Y PRESTAMOS */
 #clients-list, #loans-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Min-width un poco más grande */
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
   gap: 20px; 
 }
 
-/* NUEVOS ESTILOS PARA FORMULARIO */
 .form-input {
   width: 100%; 
-  padding: 12px; /* Más padding */
+  padding: 12px; 
   border-radius: 6px;
   border: 1px solid #ccc;
   font-size: 16px;
   transition: border-color 0.3s, box-shadow 0.3s;
 }
-/* MEJORA 6: Input Focus State */
 .form-input:focus {
     border-color: #1c5d99;
     outline: none;
     box-shadow: 0 0 5px rgba(28, 93, 153, 0.4);
 }
 
-/* BOTONES DE ACCIÓN */
 .action-btn {
   background:#1c5d99; 
   color:white; 
@@ -193,9 +173,6 @@ main {
     transform: scale(0.98);
 }
 
-/* AJUSTES DE TABLA RESPONSIVA Y CENTRADO VERTICAL (SOLICITADO) */
-
-/* Contenedor que permite scroll horizontal en móviles */
 .table-responsive-container {
     overflow-x: auto; 
     width: 100%;
@@ -204,15 +181,13 @@ main {
 table {
     width: 100%;
     border-collapse: collapse;
-    /* Asegurar que la tabla dentro del contenedor no se fuerce a un tamaño menor que su contenido */
     min-width: 700px; 
 }
 
 table td, table th {
-    padding: 12px 10px; /* Más padding */
-    border: none; /* Quitamos el borde de celdas para usar solo el de fila */
+    padding: 12px 10px; 
+    border: none; 
     text-align: left;
-    /* CAMBIO CLAVE: Centrado Vertical */
     vertical-align: middle; 
 }
 
@@ -222,16 +197,13 @@ table th {
     color: #333;
 }
 
-/* MEJORA 7: Estilo Zebra Striping para Tablas */
 .neutral-row-even {
     background: #fff !important; 
 }
 .neutral-row-odd {
-    background: #f0f4f7 !important; /* Color muy suave */
+    background: #f0f4f7 !important; 
 }
-/* Las filas impares tienen un color suave */
 
-/* MEJORA 10: Cursor Pointer para Feedback UX */
 table tr:not(.neutral-header) {
     cursor: pointer;
 }
@@ -240,16 +212,14 @@ table tr:not(.neutral-header):hover {
 }
 
 
-/* Estilo específico para la columna con el texto más propenso a desbordarse */
 .client-loan-cell {
     max-width: 250px; 
     white-space: normal; 
     word-break: break-word; 
     overflow-wrap: break-word; 
-    vertical-align: middle; /* Asegurar centrado vertical aquí también */
+    vertical-align: middle; 
 }
 
-/* === ESTILOS DE REPORTES/MORA === */
 .neutral-header {
     background: #1c5d99 !important; 
     color: white !important; 
@@ -261,12 +231,10 @@ table tr:not(.neutral-header):hover {
     color: #e74c3c; 
 }
 
-/* Quitar bordes de color de las tarjetas en reportes */
 .card-no-border-left {
     border-left: 1px solid #e0e0e0 !important; 
 }
 
-/* Contenedor del detalle de préstamos en mora - Darle borde y fondo neutro */
 #mora-loans-detail-container {
     border: 1px solid #e0e0e0;
     background: white;
@@ -276,7 +244,6 @@ table tr:not(.neutral-header):hover {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-/* MEJORA 14: MODAL DE VISUALIZACIÓN DE FACTURA */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -288,13 +255,13 @@ table tr:not(.neutral-header):hover {
     justify-content: center;
     align-items: center;
     z-index: 2000;
-    backdrop-filter: blur(5px); /* Fondo desenfocado para destacar el modal */
+    backdrop-filter: blur(5px); 
 }
 .modal-content {
     background: white;
-    padding: 20px; /* Más padding */
+    padding: 20px; 
     border-radius: 8px;
-    max-width: 800px; /* Ancho máximo para el PDF */
+    max-width: 800px; 
     width: 90%;
     max-height: 90%;
     overflow: hidden;
@@ -319,7 +286,7 @@ table tr:not(.neutral-header):hover {
     color: white;
     border: none;
     border-radius: 5px;
-    padding: 8px 15px; /* Más padding */
+    padding: 8px 15px; 
     cursor: pointer;
     font-weight: bold;
     transition: background 0.2s;
@@ -330,18 +297,17 @@ table tr:not(.neutral-header):hover {
 #invoice-iframe {
     width: 100%;
     flex-grow: 1;
-    min-height: 500px; /* Altura mínima para asegurar visibilidad */
+    min-height: 500px; 
     border: 1px solid #ddd;
     border-radius: 4px;
 }
 .modal-download-btn {
-    margin-top: 15px; /* Más margen */
+    margin-top: 15px; 
     background: #2ecc71;
 }
 
-/* === MEJORA 15: ESTILOS DE TOAST/SNACKBAR === */
 #snackbar {
-    visibility: hidden; /* Oculto por defecto. Lo mostramos con JS. */
+    visibility: hidden; 
     min-width: 250px;
     margin-left: -125px;
     background-color: #333;
@@ -350,7 +316,7 @@ table tr:not(.neutral-header):hover {
     border-radius: 6px;
     padding: 16px;
     position: fixed;
-    z-index: 3000; /* Aseguramos que esté sobre todos los elementos */
+    z-index: 3000; 
     left: 50%;
     bottom: 30px; 
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
@@ -363,13 +329,11 @@ table tr:not(.neutral-header):hover {
     animation: fadein 0.5s, fadeout 0.5s 2.5s;
 }
 
-/* Estilos de colores específicos para tipos de mensaje */
 #snackbar.success { background-color: #2ecc71; }
 #snackbar.error { background-color: #e74c3c; }
 #snackbar.warning { background-color: #f39c12; }
 #snackbar.info { background-color: #1c5d99; }
 
-/* Animaciones */
 @-webkit-keyframes fadein {
     from {bottom: 0; opacity: 0;} 
     to {bottom: 30px; opacity: 1;}
@@ -389,22 +353,14 @@ table tr:not(.neutral-header):hover {
     from {bottom: 30px; opacity: 1;}
     to {bottom: 0; opacity: 0;}
 }
-/* === FIN MEJORA 15 === */
 
-
-/* === FIN DE ESTILOS DE REPORTES/MORA === */
-
-/* MEJORA RESPONSIVE: PARA VISTAS GRANDES (desktop), mantener el layout shifted */
 @media (min-width: 768px) {
     main.shifted { 
-        /* En desktop, aplicar el margen cuando el menú está abierto */
         margin-left: 260px; 
     }
 }
 
-
-/* === ESTILOS DEL MODAL DE SUSCRIPCIÓN (TU CÓDIGO) === */
-    /* Fondo oscuro del modal */
+    /* === ESTILOS DEL MODAL DE SUSCRIPCIÓN === */
     #modal-overlay {
       display: none;
       position: fixed;
@@ -417,7 +373,6 @@ table tr:not(.neutral-header):hover {
       align-items: center;
     }
 
-    /* Caja flotante */
     #modal-box {
       background: white;
       width: 90%;
@@ -434,7 +389,6 @@ table tr:not(.neutral-header):hover {
       to   { opacity: 1; transform: scale(1); }
     }
 
-    /* Botón cerrar modal */
     #close-modal {
       border: none;
       background: red;
@@ -444,7 +398,105 @@ table tr:not(.neutral-header):hover {
       margin-top: 15px;
       cursor: pointer;
     }
-/* === FIN ESTILOS MODAL SUSCRIPCIÓN === */
+    
+    /* === NUEVOS ESTILOS PARA EL CARRUSEL DE PAGOS === */
+    .carousel-container {
+        position: relative;
+        overflow: hidden;
+        background: #f0f7ff;
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid #d0e8ff;
+    }
+
+    .carousel-slides {
+        display: flex;
+        overflow-x: scroll; /* Permite deslizar horizontalmente */
+        scroll-snap-type: x mandatory; /* Hace que se detenga en cada tarjeta */
+        -webkit-overflow-scrolling: touch; /* Suaviza el scroll en iOS */
+        gap: 15px;
+        padding: 5px; /* Espacio interno para sombra */
+    }
+    
+    .carousel-slides::-webkit-scrollbar {
+        display: none; /* Ocultar la barra de scroll */
+    }
+
+    .carousel-item {
+        flex: 0 0 90%; /* Ancho del 90% del contenedor en móvil */
+        scroll-snap-align: start;
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border-left: 5px solid #1c5d99;
+        min-width: 280px; /* Asegurar un mínimo para desktop */
+        transition: transform 0.2s;
+        cursor: pointer;
+    }
+
+    .carousel-item:hover {
+        transform: translateY(-2px);
+    }
+    
+    .carousel-item h4 {
+        margin: 0 0 5px 0;
+        color: #1c5d99;
+    }
+    
+    .carousel-item p {
+        margin: 5px 0;
+    }
+
+    .carousel-item-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px dashed #ddd;
+    }
+
+    .carousel-nav-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(28, 93, 153, 0.8);
+        color: white;
+        border: none;
+        padding: 10px;
+        cursor: pointer;
+        z-index: 10;
+        font-size: 18px;
+        line-height: 1;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        opacity: 0.8;
+        transition: opacity 0.2s;
+    }
+    
+    .carousel-nav-btn:hover {
+        opacity: 1;
+    }
+
+    #prev-btn { left: 5px; }
+    #next-btn { right: 5px; }
+
+    /* Ajuste responsive para desktop */
+    @media (min-width: 768px) {
+        .carousel-item {
+            flex: 0 0 calc(33.33% - 10px); /* 3 elementos por fila */
+        }
+        .carousel-slides {
+            overflow-x: hidden; /* Ocultar la barra de scroll en desktop */
+        }
+    }
+    /* === FIN ESTILOS CARRUSEL === */
 
 </style>
 </head>
@@ -454,7 +506,6 @@ table tr:not(.neutral-header):hover {
   <span id="menu-toggle" 
         role="button" 
         aria-controls="sidebar" 
-        /* MEJORA 11: Accesibilidad - ARIA */
         aria-expanded="false" 
         tabindex="0">☰</span>
   Presta Bill
@@ -533,7 +584,6 @@ function verificarAcceso() {
 // Abrir/cerrar modal - AÑADIDA LLAMADA A CARGAR BOTÓN AQUÍ
 function abrirModal(){ 
     document.getElementById("modal-overlay").style.display = "flex"; 
-    // CARGA EL BOTÓN SÓLO AL ABRIR EL MODAL
     if (!suscripcionActiva()) {
         cargarBotonPayPal();
     }
@@ -544,7 +594,6 @@ function cerrarModal(){ document.getElementById("modal-overlay").style.display =
 function cargarBotonPayPal() {
   const container = document.getElementById('paypal-button-container');
 
-  // Si ya está activo, mostrar un mensaje de éxito en lugar del botón
   if (suscripcionActiva()) {
       container.innerHTML = 
         '<p style="color:#2ecc71; font-weight:bold;">¡Ya tienes una Suscripción Premium activa!</p>';
@@ -565,8 +614,7 @@ function cargarBotonPayPal() {
     onApprove: function(data){
       localStorage.setItem("paypalSubscription","active");
       cerrarModal();
-      showToast('¡Suscripción completada! Acceso Premium Activado.', 'success'); // Usa el Toast de la app
-      // Opcional: Recargar el Dashboard para limpiar el modal
+      showToast('¡Suscripción completada! Acceso Premium Activado.', 'success'); 
       renderDashboard(); 
     },
     onCancel: function (data) {
@@ -575,7 +623,7 @@ function cargarBotonPayPal() {
     onError: function (err) {
         showToast('Error en la suscripción: ' + err, 'error');
     }
-  }).render(container); // Renderiza en el contenedor limpiado
+  }).render(container); 
 
 }
 // ===============================================
@@ -597,18 +645,15 @@ const DB = {
   get: k => JSON.parse(localStorage.getItem(k)||"[]"), 
   set: (k,v) => localStorage.setItem(k, JSON.stringify(v)),
   
-  // *** FUNCIÓN: Obtener y Inicializar Configuraciones ***
   getSettings: () => {
     let settings = localStorage.getItem("settings");
     if (!settings) {
         DB.set("settings", DEFAULT_SETTINGS);
         return DEFAULT_SETTINGS;
     }
-    // Asegurar que existan todos los campos por si se actualiza la app
     return {...DEFAULT_SETTINGS, ...JSON.parse(settings)};
   },
   
-  // Inicialización simple para evitar errores si no hay datos de cobros
   getInitialCobros: () => {
       let cobros = localStorage.getItem("cobros");
       if (!cobros) {
@@ -624,9 +669,8 @@ const sidebar = document.getElementById("sidebar");
 const main = document.getElementById("main");
 const header = document.getElementById("app-header");
 const menuToggle = document.getElementById("menu-toggle");
-const snackbar = document.getElementById("snackbar"); // MEJORA 15
+const snackbar = document.getElementById("snackbar"); 
 
-// MEJORA 15: Función para mostrar el Toast/Snackbar
 function showToast(message, type = 'info') {
     snackbar.textContent = message;
     snackbar.className = "show " + type;
@@ -635,23 +679,20 @@ function showToast(message, type = 'info') {
     }, 3000);
 }
 
-// MEJORA 9: Función de formato de moneda centralizada
 function formatCurrency(amount) {
     const settings = DB.getSettings();
-    // Usar toFixed(2) para asegurar dos decimales y devolver el string con el símbolo.
     return `${settings.currencySymbol} ${Number(amount).toFixed(2)}`;
 }
 
 
 // ===============================================
-// LÓGICA DE INTERFAZ (AJUSTADA)
+// LÓGICA DE INTERFAZ
 // ===============================================
 menuToggle.onclick = () => {
   const isOpening = !sidebar.classList.contains("open");
   
   sidebar.classList.toggle("open");
   
-  // MEJORA 11: Actualizar atributos ARIA
   menuToggle.setAttribute('aria-expanded', isOpening.toString());
 
   if (window.innerWidth >= 768) {
@@ -660,21 +701,18 @@ menuToggle.onclick = () => {
      main.classList.remove("shifted"); 
   }
   
-  // MEJORA 14: Enfocar el primer botón del sidebar al abrir
   if (isOpening) {
       const firstNavBtn = sidebar.querySelector('.nav-btn');
       if (firstNavBtn) {
           firstNavBtn.focus();
       }
   }
-  
-  // ELIMINADA LA LLAMADA A cargarBotonPayPal() AQUÍ: se llama al abrirModal() ahora.
 };
 
 function closeSidebar() {
   if (sidebar.classList.contains("open")) {
     sidebar.classList.remove("open");
-    menuToggle.setAttribute('aria-expanded', 'false'); // MEJORA 11
+    menuToggle.setAttribute('aria-expanded', 'false'); 
     
     if (window.innerWidth >= 768) {
         main.classList.remove("shifted"); 
@@ -683,36 +721,228 @@ function closeSidebar() {
 }
 
 // ===============================================
-// VISTA: DASHBOARD
+// FUNCIÓN DE CÁLCULO DE RIESGO DE MORA (Necesaria para el Carrusel)
+// ===============================================
+function calculateLoanRisk(loan) {
+    const today = new Date();
+    const startDate = new Date(loan.startDate + 'T00:00:00'); 
+    const cuotaMensual = Number(loan.monthlyPayment);
+    const paymentsMade = Number(loan.paymentsMade);
+    const termMonths = Number(loan.termMonths);
+
+    if (loan.status === 'Pagado') {
+        return { paymentsDue: termMonths, paymentsMade: termMonths, monthsBehind: 0, totalDue: 0, nextDueDate: null };
+    }
+
+    let paymentsDue = 0;
+    let nextDueDate = null;
+
+    for (let i = 1; i <= termMonths; i++) {
+        let dueDate = new Date(startDate);
+        dueDate.setMonth(startDate.getMonth() + i);
+
+        if (startDate.getDate() !== dueDate.getDate()) {
+            dueDate.setDate(0); 
+            dueDate.setDate(startDate.getDate()); 
+        }
+
+        const dateOnlyToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const dateOnlyDue = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
+        
+        if (dateOnlyToday >= dateOnlyDue) {
+            paymentsDue = i; 
+        } else {
+            nextDueDate = dueDate.toISOString().split('T')[0];
+            break; 
+        }
+    }
+    
+    let monthsBehind = Math.max(0, paymentsDue - paymentsMade);
+    let totalDue = cuotaMensual * monthsBehind;
+
+    if (paymentsDue === termMonths && paymentsMade < termMonths) {
+        nextDueDate = null;
+    }
+
+    return {
+        paymentsDue, 
+        paymentsMade: paymentsMade,
+        monthsBehind,
+        totalDue: totalDue,
+        nextDueDate: nextDueDate
+    };
+}
+// ===============================================
+
+
+// ===============================================
+// FUNCIÓN NUEVA: OBTENER PRÓXIMAS CUOTAS (PARA CARRUSEL)
+// ===============================================
+function getUpcomingPayments() {
+    const allLoans = DB.get("loans").filter(l => l.status !== 'Pagado');
+    const upcomingPayments = [];
+    const today = new Date();
+    
+    for (const loan of allLoans) {
+        const risk = calculateLoanRisk(loan);
+        
+        // Excluir préstamos que estén en mora (estos deben ser tratados en la sección de cobros)
+        if (risk.monthsBehind > 0) continue; 
+        
+        // Si no hay mora Y hay una próxima fecha de vencimiento
+        if (risk.nextDueDate) {
+            const dueDate = new Date(risk.nextDueDate + 'T00:00:00');
+            const diffDays = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+            
+            // Solo considerar pagos a vencer en los próximos 60 días
+            if (diffDays >= 0 && diffDays <= 60) {
+                upcomingPayments.push({
+                    loanId: loan.id,
+                    clientName: loan.clientName,
+                    amount: Number(loan.monthlyPayment),
+                    dueDate: risk.nextDueDate,
+                    daysLeft: diffDays
+                });
+            }
+        }
+    }
+    
+    // Ordenar por fecha de vencimiento (el más próximo primero)
+    return upcomingPayments.sort((a, b) => a.daysLeft - b.daysLeft);
+}
+
+// ===============================================
+// FUNCIÓN NUEVA: RENDERIZAR CARRUSEL DE PAGOS
+// ===============================================
+let carouselIndex = 0;
+
+function renderUpcomingPaymentsCarousel() {
+    const upcomingPayments = getUpcomingPayments();
+    const container = document.getElementById('upcoming-payments-carousel-container');
+    
+    if (!container) return; // Salir si el contenedor no existe
+
+    if (upcomingPayments.length === 0) {
+        container.innerHTML = `
+            <div class="card" style="border-left: 5px solid #2ecc71; background: #f0fff0;">
+                <h4 style="color:#2ecc71; margin-top:0;">🎉 ¡Todo al Día!</h4>
+                <p>No hay cuotas próximas a vencer en los próximos 60 días o todos los préstamos están saldados/en mora.</p>
+                <button class="action-btn" style="width: auto; padding: 8px 15px; background: #2ecc71;" onclick="renderCobros()">Ver Cobros Pendientes</button>
+            </div>
+        `;
+        return;
+    }
+    
+    // Generar las tarjetas del carrusel
+    const slidesHTML = upcomingPayments.map(p => {
+        const dateFormatted = p.dueDate.split('-').reverse().join('/');
+        const daysText = p.daysLeft === 0 ? '¡HOY!' : `en ${p.daysLeft} días`;
+        const color = p.daysLeft <= 7 ? '#e74c3c' : (p.daysLeft <= 30 ? '#f39c12' : '#1c5d99');
+        
+        return `
+            <div class="carousel-item" style="border-left-color: ${color};" 
+                 onclick="renderCobros('${p.loanId}')">
+                <h4>${p.clientName}</h4>
+                <p>Préstamo ID: <b>${p.loanId.toUpperCase().substring(0, 8)}</b></p>
+                <div class="carousel-item-footer">
+                    <span style="font-weight:bold; font-size:1.4em; color:${color};">${formatCurrency(p.amount)}</span>
+                    <span style="text-align:right;">
+                        Vence: <b>${dateFormatted}</b><br>
+                        <strong style="color:${color};">${daysText}</strong>
+                    </span>
+                </div>
+                <button class="action-btn" style="padding: 8px 15px; margin-top:10px; background:${color};">Registrar Cobro</button>
+            </div>
+        `;
+    }).join('');
+
+    // Estructura completa del carrusel con botones de navegación
+    container.innerHTML = `
+        <div class="carousel-container">
+            <div id="carousel-slides" class="carousel-slides">
+                ${slidesHTML}
+            </div>
+            <button id="prev-btn" class="carousel-nav-btn" onclick="moveCarousel(-1)">&#10094;</button>
+            <button id="next-btn" class="carousel-nav-btn" onclick="moveCarousel(1)">&#10095;</button>
+        </div>
+    `;
+    
+    // Esconder botones en móviles o si hay pocos ítems (solo si no se usa scroll)
+    if (window.innerWidth < 768 || upcomingPayments.length <= 3) {
+        document.getElementById('prev-btn').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'none';
+    } else {
+        // En desktop, añadimos el control manual si hay más de 3
+        updateCarouselButtons();
+    }
+}
+
+// Lógica de movimiento del carrusel (solo para desktop con botones)
+function moveCarousel(direction) {
+    const slides = document.getElementById('carousel-slides');
+    const items = slides.getElementsByClassName('carousel-item');
+    if (items.length === 0) return;
+    
+    const maxIndex = items.length - 1; 
+    
+    // Calcular el nuevo índice (mínimo 0, máximo el último índice)
+    carouselIndex = Math.max(0, Math.min(maxIndex, carouselIndex + direction));
+    
+    // Calcular la posición de scroll
+    // 300px es el ancho aproximado de una tarjeta + gap en desktop (ajustar si es necesario)
+    const scrollPosition = carouselIndex * items[0].offsetWidth + (carouselIndex * 15); 
+    
+    slides.scrollTo({
+        left: scrollPosition,
+        behavior: 'smooth'
+    });
+    
+    updateCarouselButtons();
+}
+
+// Ocultar/Mostrar botones de navegación (desktop)
+function updateCarouselButtons() {
+    const items = document.getElementById('carousel-slides').getElementsByClassName('carousel-item');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    
+    if (!prevBtn || !nextBtn || items.length === 0) return;
+
+    // Mostrar/Ocultar el botón anterior
+    prevBtn.style.visibility = carouselIndex > 0 ? 'visible' : 'hidden';
+
+    // Mostrar/Ocultar el botón siguiente (si hay más de 3 items y no estamos en el final)
+    nextBtn.style.visibility = (carouselIndex < items.length - 3) ? 'visible' : 'hidden';
+}
+// ===============================================
+
+
+// ===============================================
+// VISTA: DASHBOARD - LLAMADA AL CARRUSEL
 // ===============================================
 function calculateLoanPortfolioSummary() {
     const allLoans = DB.get("loans");
     const allCobros = DB.getInitialCobros();
-    let netBalancePending = 0; // Principal + Interés
+    let netBalancePending = 0; 
     let moraAmount = 0;
     let totalPrincipalLent = 0;
 
     for (const loan of allLoans) {
-        // 1. Calcular el total a pagar (Principal + Interés)
         const totalPagar = Number(loan.amount) + Number(loan.totalInterest);
         totalPrincipalLent += Number(loan.amount);
 
-        // 2. Monto pagado hasta la fecha
         const totalPaidAmount = allCobros
             .filter(c => c.loanId === loan.id)
             .reduce((sum, current) => sum + Number(current.amount), 0);
         
-        // 3. Saldo pendiente
         const remainingBalance = totalPagar - totalPaidAmount;
         
-        if (remainingBalance > 0.01) { // Pequeño margen
+        if (remainingBalance > 0.01) { 
             netBalancePending += remainingBalance;
         }
 
-        // 4. Calcular Mora
         const risk = calculateLoanRisk(loan);
         if (risk.monthsBehind > 0) {
-            // Usamos el total adeudado por cuotas vencidas y no pagadas
             moraAmount += risk.totalDue; 
         }
     }
@@ -725,17 +955,14 @@ function renderDashboard(){
   const clients = DB.get("clients").length;
   const cobros = DB.getInitialCobros(); 
   
-  // 1. CÁLCULO DE GANANCIAS
   const totalGanancias = cobros.reduce((a,b)=> a+Number(b.amount),0); 
 
-  // 2. CÁLCULO DE SALDO PENDIENTE NETO Y MORA 
   const summary = calculateLoanPortfolioSummary();
   const netBalancePending = summary.netBalancePending; 
   
   const allLoans = DB.get("loans");
   const loansInMora = allLoans.filter(l => calculateLoanRisk(l).monthsBehind > 0); 
   
-  // Agregar un mensaje si el trial ha expirado
   let premiumWarning = '';
   if (!trialActivo() && !suscripcionActiva()) {
     premiumWarning = `
@@ -759,6 +986,10 @@ function renderDashboard(){
     <h2>Resumen de Préstamos 📈</h2>
     
     ${premiumWarning}
+    
+    <h3>Próximas Cuotas a Vencer (60 días)</h3>
+    <div id="upcoming-payments-carousel-container">
+        </div>
 
     <div class="dashboard-cards-container">
         
@@ -797,14 +1028,17 @@ function renderDashboard(){
     </div>
   `;
   
+  // LLAMADA CLAVE PARA RENDERIZAR EL CARRUSEL
+  renderUpcomingPaymentsCarousel();
+  
   renderLoanDistributionChart();
 }
 
 function renderLoanDistributionChart() {
+    // ... (El resto de la función renderLoanDistributionChart() es igual) ...
     const loans = DB.get("loans");
     if (loans.length === 0) return;
 
-    // Calcular la suma de los montos de préstamos por cliente
     const clientAmounts = {};
     loans.forEach(loan => {
         clientAmounts[loan.clientName] = (clientAmounts[loan.clientName] || 0) + Number(loan.amount);
@@ -813,7 +1047,6 @@ function renderLoanDistributionChart() {
     const labels = Object.keys(clientAmounts);
     const data = Object.values(clientAmounts);
     
-    // Función simple para generar colores de forma consistente
     const getColors = (count) => {
         const colors = [
             '#1c5d99', '#4a6d4a', '#f39c12', '#e74c3c', '#9b59b6', 
@@ -835,7 +1068,7 @@ function renderLoanDistributionChart() {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false, // Permitir que el contenedor maneje la altura
+            maintainAspectRatio: false, 
             plugins: {
                 legend: {
                     position: 'top',
@@ -848,23 +1081,16 @@ function renderLoanDistributionChart() {
         }
     });
 }
+// ... (El resto de las funciones de Clientes, Préstamos, Cobros, Reportes, etc., son iguales) ...
 
-
-// ===============================================
-// FUNCIÓN AUXILIAR: CALCULAR MONTO TOTAL PRESTADO POR CLIENTE
-// ===============================================
 function calculateTotalLoanAmount(clientId) {
     const loans = DB.get("loans");
-    // Suma el monto (capital principal) de todos los préstamos asociados a ese cliente
     return loans
         .filter(l => l.clientId === clientId)
         .reduce((sum, current) => sum + Number(current.amount), 0);
 }
 
 
-// ===============================================
-// VISTA: CLIENTES
-// ===============================================
 function renderClients(){
   main.innerHTML = `
     <h2>Clientes 👥</h2>
@@ -894,10 +1120,9 @@ function renderClients(){
 }
 
 function addClient(){
-  // Aplicar bloqueo de suscripción
   if (!trialActivo() && !suscripcionActiva()) {
     showToast("Función Premium: Tu período de prueba ha expirado. Suscríbete para agregar nuevos clientes.", 'error');
-    abrirModal(); // Sugerir la suscripción
+    abrirModal(); 
     return;
   }
   
@@ -908,13 +1133,12 @@ function addClient(){
   const phoneMobile = document.getElementById("client-phone-mobile").value.trim();
   
   if(!name || !cedula) {
-    showToast("Nombre y Cédula/ID son requeridos", 'error'); // MEJORA 15
+    showToast("Nombre y Cédula/ID son requeridos", 'error'); 
     return;
   }
   
   const all = DB.get("clients");
   
-  // MEJORA 16: Validación de Cédula Duplicada
   const isDuplicate = all.some(client => client.cedula === cedula);
   if (isDuplicate) {
     showToast(`Error: Ya existe un cliente con la Cédula/ID ${cedula}.`, 'error');
@@ -931,7 +1155,6 @@ function addClient(){
   });
   DB.set("clients", all);
   
-  // Limpiar el formulario y refrescar la lista
   document.getElementById("client-name").value = '';
   document.getElementById("client-cedula").value = '';
   document.getElementById("client-address").value = '';
@@ -939,7 +1162,7 @@ function addClient(){
   document.getElementById("client-phone-mobile").value = '';
   
   refreshClientsList();
-  showToast("Cliente agregado correctamente", 'success'); // MEJORA 15
+  showToast("Cliente agregado correctamente", 'success'); 
 }
 
 function refreshClientsList(searchTerm = ''){
@@ -958,7 +1181,7 @@ function refreshClientsList(searchTerm = ''){
   if(list.length===0){ 
     box.innerHTML=`<p style="text-align:center; padding:20px;">${searchTerm ? 'No se encontraron clientes que coincidan con la búsqueda.' : ''}</p>`; 
     if (!searchTerm && warningBox) {
-        warningBox.style.display = 'block'; // Mostrar la advertencia si no hay clientes y no hay búsqueda
+        warningBox.style.display = 'block'; 
     } else if (warningBox) {
         warningBox.style.display = 'none';
     }
@@ -968,7 +1191,6 @@ function refreshClientsList(searchTerm = ''){
   }
   
   box.innerHTML = list.map(c=>{
-    // Se calcula el monto total prestado (capital principal)
     const totalPrestado = calculateTotalLoanAmount(c.id);
 
     return `
@@ -992,9 +1214,7 @@ function refreshClientsList(searchTerm = ''){
   }).join("");
 }
 
-// MEJORA 12: FUNCIÓN: ELIMINACIÓN EN CASCADA (CLIENTE)
 function deleteClient(id) {
-    // Aplicar bloqueo de suscripción a la edición/eliminación
     if (!trialActivo() && !suscripcionActiva()) {
         showToast("Función Premium: Tu período de prueba ha expirado. Suscríbete para editar o eliminar datos.", 'error');
         abrirModal();
@@ -1003,40 +1223,29 @@ function deleteClient(id) {
     
     if (!confirm("ADVERTENCIA: ¿Está seguro de que desea eliminar a este cliente? Esto eliminará PERMANENTEMENTE todos sus préstamos y el historial de cobros asociados.")) return;
 
-    // 1. Eliminar el Cliente
     let allClients = DB.get("clients");
     allClients = allClients.filter(c => c.id !== id);
     DB.set("clients", allClients);
     
-    // 2. Eliminar Préstamos (Loans) del Cliente
     let allLoans = DB.get("loans");
-    // Obtenemos la lista de préstamos que se van a eliminar para obtener sus IDs.
     const loansToDelete = allLoans.filter(l => l.clientId === id); 
-    // Mantenemos solo los préstamos cuyo clientId NO coincida con el id del cliente a borrar
     allLoans = allLoans.filter(l => l.clientId !== id);
     DB.set("loans", allLoans);
 
-    // 3. Eliminar Cobros (Historial de Transacciones) del Cliente
     let allCobros = DB.getInitialCobros();
-    // Obtenemos los IDs de los préstamos que se están borrando
     const loanIdsToDelete = loansToDelete.map(l => l.id);
     
-    // Mantenemos solo los cobros cuyo loanId NO esté en la lista de loanIdsToDelete
     allCobros = allCobros.filter(c => !loanIdsToDelete.includes(c.loanId));
     DB.set("cobros", allCobros);
 
-    // Refrescar la lista de clientes en la vista actual
     const searchTerm = document.getElementById("client-search") ? document.getElementById("client-search").value : '';
     refreshClientsList(searchTerm);
     
-    // Mensaje de confirmación (MEJORA 15)
     showToast("Cliente, préstamos y cobros asociados eliminados correctamente.", 'warning');
 }
-// ===============================================
 
 
 function prepareEdit(id) {
-    // Aplicar bloqueo de suscripción a la edición
     if (!trialActivo() && !suscripcionActiva()) {
         showToast("Función Premium: Tu período de prueba ha expirado. Suscríbete para editar datos.", 'error');
         abrirModal();
@@ -1046,7 +1255,6 @@ function prepareEdit(id) {
     const client = DB.get("clients").find(c => c.id === id);
     if (!client) return;
 
-    // Calcular el monto total prestado para MOSTRARLO (no editar)
     const totalPrestado = calculateTotalLoanAmount(id);
 
     document.getElementById(`client-view-${id}`).style.display = 'none';
@@ -1075,11 +1283,10 @@ function prepareEdit(id) {
 function cancelEdit(id) {
     document.getElementById(`client-view-${id}`).style.display = 'block';
     document.getElementById(`client-edit-${id}`).style.display = 'none';
-    document.getElementById(`client-edit-${id}`).innerHTML = ''; // Limpiar el contenido de edición
+    document.getElementById(`client-edit-${id}`).innerHTML = ''; 
 }
 
 function saveClient(id) {
-    // Aplicar bloqueo de suscripción a la edición
     if (!trialActivo() && !suscripcionActiva()) {
         showToast("Función Premium: Tu período de prueba ha expirado. Suscríbete para editar datos.", 'error');
         abrirModal();
@@ -1093,7 +1300,7 @@ function saveClient(id) {
     const phoneMobile = document.getElementById(`edit-phone-mobile-${id}`).value.trim();
 
     if(!name || !cedula) {
-        showToast("Nombre y Cédula son requeridos para guardar.", 'error'); // MEJORA 15
+        showToast("Nombre y Cédula son requeridos para guardar.", 'error'); 
         return;
     }
 
@@ -1101,7 +1308,6 @@ function saveClient(id) {
     const index = all.findIndex(c => c.id === id);
     if (index === -1) return;
     
-    // MEJORA 16: Validación de Cédula Duplicada al Editar
     const isDuplicate = all.some(c => c.cedula === cedula && c.id !== id);
     if (isDuplicate) {
         showToast(`Error: Ya existe otro cliente con la Cédula/ID ${cedula}.`, 'error');
@@ -1122,13 +1328,10 @@ function saveClient(id) {
     
     const searchTerm = document.getElementById("client-search") ? document.getElementById("client-search").value : '';
     refreshClientsList(searchTerm);
-    showToast("Cliente guardado correctamente.", 'success'); // MEJORA 15
+    showToast("Cliente guardado correctamente.", 'success'); 
 }
 
-// ===============================================
 // VISTA: PRÉSTAMOS
-// ===============================================
-
 function renderLoans() {
     const settings = DB.getSettings();
   main.innerHTML = `
@@ -1162,8 +1365,8 @@ function renderLoans() {
             </div>
     </div>
   `;
-  populateClientSelect(); // Llena el selector de clientes
-  refreshLoanList();      // Carga la lista de préstamos existentes
+  populateClientSelect(); 
+  refreshLoanList();      
 }
 
 function populateClientSelect() {
@@ -1175,7 +1378,6 @@ function populateClientSelect() {
         return;
     }
 
-    // Asegurarse de que el primer elemento sea el placeholder
     select.innerHTML = '<option value="">-- Seleccione un Cliente --</option>'; 
     
     clients.forEach(c => {
@@ -1186,11 +1388,7 @@ function populateClientSelect() {
     });
 }
 
-// ====================================================================
-// LÓGICA DE CÁLCULO Y REGISTRO DE PRÉSTAMO
-// ====================================================================
 function calculateAndSaveLoan() {
-    // Aplicar bloqueo de suscripción
     if (!trialActivo() && !suscripcionActiva()) {
         showToast("Función Premium: Tu período de prueba ha expirado. Suscríbete para registrar nuevos préstamos.", 'error');
         abrirModal();
@@ -1198,34 +1396,29 @@ function calculateAndSaveLoan() {
     }
     
     const clientId = document.getElementById("loan-client").value;
-    const P = Number(document.getElementById("loan-amount").value); // Monto del préstamo
-    
-    // Obtener la tasa de interés base del formulario (ya precargada con settings.baseInterestRate)
+    const P = Number(document.getElementById("loan-amount").value); 
     const interesBase = Number(document.getElementById("loan-interest-base").value); 
-    const n = Number(document.getElementById("loan-term").value); // Plazo (meses)
+    const n = Number(document.getElementById("loan-term").value); 
     
     if (!clientId) {
-        showToast("Por favor, seleccione un cliente.", 'error'); // MEJORA 15
+        showToast("Por favor, seleccione un cliente.", 'error'); 
         return;
     }
     if (P <= 0 || interesBase < 0 || n <= 0) {
-        showToast("Por favor, complete todos los campos de la calculadora correctamente con valores positivos.", 'error'); // MEJORA 15
+        showToast("Por favor, complete todos los campos de la calculadora correctamente con valores positivos.", 'error'); 
         return;
     }
 
     const client = DB.get("clients").find(c => c.id === clientId);
     if (!client) {
-        showToast("Cliente no encontrado.", 'error'); // MEJORA 15
+        showToast("Cliente no encontrado.", 'error'); 
         return;
     }
 
-    // Lógica de Cuotas Iguales con Interés Proporcional
-    // Tasa total de interés (proporcional a la tasa base de 3 meses)
     const totalInteres = P * (interesBase / 100) * (n / 3);
     const totalPagar = P + totalInteres;
     const cuotaMensual = totalPagar / n;
 
-    // Mostrar el resumen del cálculo
     let resultadoHTML = `
         <h4 style="margin-top:0;">Resumen del Préstamo</h4>
         <p style="border-top: 1px solid #ccc; padding-top: 10px;">
@@ -1237,12 +1430,11 @@ function calculateAndSaveLoan() {
     `;
     document.getElementById('calculator-summary').innerHTML = resultadoHTML;
     
-    // Objeto para registrar el nuevo préstamo
     const newLoan = {
         id: genId(),
         clientId: clientId,
         clientName: client.name,
-        amount: P.toFixed(2), // Guardar como string con 2 decimales
+        amount: P.toFixed(2), 
         interestRateBase: interesBase,
         termMonths: n,
         monthlyPayment: cuotaMensual.toFixed(2),
@@ -1251,30 +1443,26 @@ function calculateAndSaveLoan() {
         status: 'Activo',
         paymentsMade: 0, 
         totalPaidAmount: 0, 
-        startDate: new Date().toISOString().split('T')[0] // Formato YYYY-MM-DD
+        startDate: new Date().toISOString().split('T')[0] 
     };
 
     const allLoans = DB.get("loans");
     allLoans.push(newLoan);
     DB.set("loans", allLoans);
 
-    showToast(`Préstamo registrado. Cuota Mensual: ${formatCurrency(newLoan.monthlyPayment)}`, 'success'); // MEJORA 15
+    showToast(`Préstamo registrado. Cuota Mensual: ${formatCurrency(newLoan.monthlyPayment)}`, 'success'); 
     
-    // Limpiar formulario (manteniendo los valores por defecto)
     const settings = DB.getSettings();
     document.getElementById("loan-amount").value = '10000';
     document.getElementById("loan-interest-base").value = settings.baseInterestRate;
     document.getElementById("loan-term").value = '3';
     document.getElementById("loan-client").value = '';
-    document.getElementById('calculator-summary').innerHTML = ''; // Limpiar el resumen
+    document.getElementById('calculator-summary').innerHTML = ''; 
 
-    refreshLoanList(); // Actualiza la lista de préstamos
+    refreshLoanList(); 
 }
 
-
-// MEJORA 12: FUNCIÓN DE ELIMINACIÓN DE PRÉSTAMO INDIVIDUAL (CASCADA)
 function deleteLoan(id) {
-    // Aplicar bloqueo de suscripción
     if (!trialActivo() && !suscripcionActiva()) {
         showToast("Función Premium: Tu período de prueba ha expirado. Suscríbete para editar o eliminar datos.", 'error');
         abrirModal();
@@ -1283,93 +1471,23 @@ function deleteLoan(id) {
     
     if (!confirm("ADVERTENCIA: ¿Está seguro de que desea eliminar este PRÉSTAMO? Esto eliminará PERMANENTEMENTE este préstamo y todos los cobros asociados a él.")) return;
 
-    // 1. Eliminar el Préstamo
     let allLoans = DB.get("loans");
     allLoans = allLoans.filter(l => l.id !== id);
     DB.set("loans", allLoans);
     
-    // 2. Eliminar Cobros (Historial de Transacciones) asociados a este LoanId
     let allCobros = DB.getInitialCobros();
     allCobros = allCobros.filter(c => c.loanId !== id);
     DB.set("cobros", allCobros);
 
     refreshLoanList(); 
     
-    // Si la vista de Cobros está abierta, refrescarla también
     if (document.getElementById('pending-payments-list')) {
         refreshPendingPayments();
     }
 
-    showToast("Préstamo y sus cobros asociados eliminados correctamente.", 'warning'); // MEJORA 15
+    showToast("Préstamo y sus cobros asociados eliminados correctamente.", 'warning'); 
 }
-// ===============================================
 
-// MEJORA 13: FUNCIÓN DE CÁLCULO DE RIESGO DE MORA (MEJORADA Y MÁS ROBUSTA)
-function calculateLoanRisk(loan) {
-    const today = new Date();
-    // Normalizar la fecha de inicio para evitar problemas de zona horaria al calcular los meses
-    const startDate = new Date(loan.startDate + 'T00:00:00'); 
-    const cuotaMensual = Number(loan.monthlyPayment);
-    const paymentsMade = Number(loan.paymentsMade);
-    const termMonths = Number(loan.termMonths);
-
-    // Si está pagado, no hay mora
-    if (loan.status === 'Pagado') {
-        return { paymentsDue: termMonths, paymentsMade: termMonths, monthsBehind: 0, totalDue: 0, nextDueDate: null };
-    }
-
-    // --- CÁLCULO ROBUSTO DE CUOTAS VENCIDAS ---
-    let paymentsDue = 0;
-    let nextDueDate = null;
-
-    // Iteramos por todas las posibles cuotas, desde la 1 hasta el total del plazo
-    for (let i = 1; i <= termMonths; i++) {
-        // La cuota i vence i meses después de la fecha de inicio
-        let dueDate = new Date(startDate);
-        dueDate.setMonth(startDate.getMonth() + i);
-
-        // Ajuste para mantener el día de inicio
-        if (startDate.getDate() !== dueDate.getDate()) {
-            // Ajustar al último día del mes si es necesario
-            dueDate.setDate(0); 
-            dueDate.setDate(startDate.getDate()); 
-            // Esto es solo un ajuste para mantener la lógica de "día de pago" consistente
-        }
-
-        // Si la fecha de vencimiento es HOY o en el PASADO (consideramos HOY vencido)
-        const dateOnlyToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-        const dateOnlyDue = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
-        
-        if (dateOnlyToday >= dateOnlyDue) {
-            paymentsDue = i; // La cuota 'i' ha vencido
-        } else {
-            // Si encontramos una cuota que vence en el futuro, esa es la próxima fecha.
-            nextDueDate = dueDate.toISOString().split('T')[0];
-            break; 
-        }
-    }
-    
-    // 1. Calcular Cuotas Atrasadas (Mora)
-    let monthsBehind = Math.max(0, paymentsDue - paymentsMade);
-    
-    // 2. Calcular el monto total adeudado (cuotas atrasadas)
-    // El monto adeudado es el monto de las cuotas vencidas y no pagadas
-    let totalDue = cuotaMensual * monthsBehind;
-
-    // Si paymentsDue alcanzó el total del plazo pero paymentsMade es menor, el nextDueDate es nulo (vencimiento expirado)
-    if (paymentsDue === termMonths && paymentsMade < termMonths) {
-        nextDueDate = null;
-    }
-
-    return {
-        paymentsDue, // Cuotas que deberían haberse pagado hasta ahora (máx. termMonths)
-        paymentsMade: paymentsMade,
-        monthsBehind,
-        totalDue: totalDue,
-        nextDueDate: nextDueDate
-    };
-}
-// ===============================================
 
 function refreshLoanList() {
     const loans = DB.get("loans");
@@ -1388,16 +1506,14 @@ function refreshLoanList() {
         const statusText = risk.monthsBehind > 0 ? `Mora (${risk.monthsBehind} meses)` : l.status;
         const progressStyle = paidPercentage > 100 ? 100 : paidPercentage;
         
-        // Determinar qué mostrar en "Próximo Vencimiento"
         let nextDueText = 'N/A';
         if (l.status === 'Pagado') {
             nextDueText = 'Préstamo saldado.';
         } else if (risk.monthsBehind > 0) {
             nextDueText = `<span style="color:red; font-weight:bold;">¡En Mora!</span>`;
         } else if (risk.nextDueDate) {
-             nextDueText = risk.nextDueDate.split('-').reverse().join('/'); // Formato DD/MM/AAAA
+             nextDueText = risk.nextDueDate.split('-').reverse().join('/'); 
         } else {
-             // Este caso solo aplica si el préstamo está completamente vencido pero no pagado.
              nextDueText = 'Vencimiento Expirado';
         }
 
@@ -1432,10 +1548,7 @@ function refreshLoanList() {
     box.innerHTML = `<div id="loans-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">${tableRows}</div>`;
 }
 
-// ===============================================
 // VISTA: COBROS (PAGOS)
-// ===============================================
-
 function renderCobros(loanIdToSelect = null) {
     const settings = DB.getSettings();
     main.innerHTML = `
@@ -1503,7 +1616,7 @@ function populateLoanSelect(loanIdToSelect) {
     
     if (loanIdToSelect && select.querySelector(`option[value="${loanIdToSelect}"]`)) {
         select.value = loanIdToSelect;
-        updatePaymentDetails(); // Cargar detalles si hay un ID preseleccionado
+        updatePaymentDetails(); 
     }
 }
 
@@ -1513,7 +1626,7 @@ function updatePaymentDetails() {
     const paymentAmountInput = document.getElementById("payment-amount");
     
     summaryBox.innerHTML = 'Seleccione un préstamo para ver el resumen de pago.';
-    paymentAmountInput.value = ''; // Limpiar monto de pago
+    paymentAmountInput.value = ''; 
 
     if (!loanId) return;
 
@@ -1527,17 +1640,16 @@ function updatePaymentDetails() {
     
     let moraText = '';
     
-    // Si el restante es menor a cero (por posibles desajustes de coma flotante)
     if (remainingBalance <= 0.01) { 
         paymentAmountInput.value = '0.00';
         moraText = '<p style="color:#2ecc71; font-weight:bold; margin: 5px 0;">Préstamo completamente saldado.</p>';
     } else if (risk.monthsBehind > 0) {
         moraText = `<p style="color:#e74c3c; font-weight:bold; margin: 5px 0;">¡En Mora! Adeuda ${risk.monthsBehind} cuota(s) por un total de ${formatCurrency(risk.totalDue)}.</p>`;
-        paymentAmountInput.value = risk.totalDue.toFixed(2); // Sugerir el monto en mora
+        paymentAmountInput.value = risk.totalDue.toFixed(2); 
     } else if (remainingBalance > 0 && remainingBalance < cuotaMensual) {
-        paymentAmountInput.value = remainingBalance.toFixed(2); // Sugerir el restante (pago final)
+        paymentAmountInput.value = remainingBalance.toFixed(2); 
     } else {
-        paymentAmountInput.value = cuotaMensual.toFixed(2); // Sugerir la cuota normal
+        paymentAmountInput.value = cuotaMensual.toFixed(2); 
     }
 
 
@@ -1550,7 +1662,6 @@ function updatePaymentDetails() {
 }
 
 function registerPayment() {
-    // Aplicar bloqueo de suscripción
     if (!trialActivo() && !suscripcionActiva()) {
         showToast("Función Premium: Tu período de prueba ha expirado. Suscríbete para registrar cobros.", 'error');
         abrirModal();
@@ -1561,14 +1672,14 @@ function registerPayment() {
     const amount = Number(document.getElementById("payment-amount").value);
     
     if (!loanId || amount <= 0) {
-        showToast("Seleccione un préstamo e ingrese un monto válido.", 'error'); // MEJORA 15
+        showToast("Seleccione un préstamo e ingrese un monto válido.", 'error'); 
         return;
     }
 
     let allLoans = DB.get("loans");
     const loanIndex = allLoans.findIndex(l => l.id === loanId);
     if (loanIndex === -1) {
-        showToast("Préstamo no encontrado.", 'error'); // MEJORA 15
+        showToast("Préstamo no encontrado.", 'error'); 
         return;
     }
 
@@ -1577,35 +1688,30 @@ function registerPayment() {
     const remainingBalance = totalPagar - Number(loan.totalPaidAmount);
     const cuotaMensual = Number(loan.monthlyPayment);
     
-    if (amount > remainingBalance + 0.01) { // Añadir un pequeño margen por errores de coma flotante
+    if (amount > remainingBalance + 0.01) { 
         if (!confirm(`El monto de ${formatCurrency(amount)} es mayor al saldo pendiente (${formatCurrency(remainingBalance)}). ¿Desea registrar el pago igual? El saldo restante se ajustará a cero.`)) {
             return;
         }
     }
     
-    // 1. Guardar el estado ANTES del nuevo cobro para el cálculo de la factura
     const oldTotalPaidAmount = Number(loan.totalPaidAmount);
-    // Calcular paymentsMadeBefore basado en el total pagado antes del cobro actual
     const oldPaymentsMade = Math.floor(oldTotalPaidAmount / cuotaMensual);
 
-    // 2. Registrar el cobro
     let allCobros = DB.getInitialCobros();
     const newCobro = {
         id: genId(),
         loanId: loanId,
         clientName: loan.clientName,
-        amount: amount.toFixed(2), // Guardar como string con 2 decimales
+        amount: amount.toFixed(2), 
         date: new Date().toLocaleDateString(),
         fullDateTime: new Date().toISOString()
     };
     allCobros.push(newCobro);
     DB.set("cobros", allCobros);
 
-    // 3. Actualizar el préstamo
     loan.totalPaidAmount = oldTotalPaidAmount + amount;
     loan.paymentsMade = Math.floor(loan.totalPaidAmount / cuotaMensual);
 
-    // 4. Revisar el estado
     const newRemaining = totalPagar - loan.totalPaidAmount;
     if (newRemaining <= 0.01) { 
         loan.status = 'Pagado';
@@ -1618,42 +1724,40 @@ function registerPayment() {
     allLoans[loanIndex] = loan;
     DB.set("loans", allLoans);
 
-    showToast(`Cobro de ${formatCurrency(amount)} registrado para ${loan.clientName}.`, 'success'); // MEJORA 15
+    showToast(`Cobro de ${formatCurrency(amount)} registrado para ${loan.clientName}.`, 'success'); 
     
-    // MEJORA 14: LÓGICA: GENERAR FACTURA AL COBRAR (PREGUNTA)
     if (confirm("Cobro exitoso. ¿Desea ver y descargar la factura del pago en PDF?")) {
-        // Enviar el ID del cobro recién creado y el estado anterior
         viewInvoicePDF(newCobro.id, {
             oldTotalPaidAmount,
             oldPaymentsMade
         }); 
     }
-    // **********************************************
 
-    // Refrescar vistas
     document.getElementById("payment-amount").value = '';
     document.getElementById("payment-loan-id").value = '';
     document.getElementById("loan-summary-payment").innerHTML = 'Seleccione un préstamo para ver el resumen de pago.';
     populateLoanSelect();
-    populateCobroSelectForInvoice(); // Refrescar el select de factura
+    populateCobroSelectForInvoice(); 
     refreshPendingPayments();
+    
+    // Si la vista actual es el Dashboard, refrescarlo para actualizar el carrusel y las tarjetas
+    if(document.getElementById('loanDistributionChart')) {
+        renderDashboard();
+    }
 }
 
-// ===============================================
 // MEJORA 14: FUNCIONES DE FACTURACIÓN PDF (ACTUALIZADO CON autoTable Y DETALLES DE RECIBO)
-// ===============================================
-let currentCobroId = null; // Variable global para saber qué cobro descargar
+let currentCobroId = null; 
 
-// MEJORA 14: NUEVA FUNCIÓN PARA POBLAR SELECT DE COBROS EN FACTURA
 function populateCobroSelectForInvoice() {
-    const allCobros = DB.getInitialCobros().sort((a, b) => new Date(b.fullDateTime) - new Date(a.fullDateTime)); // El más reciente primero
+    const allCobros = DB.getInitialCobros().sort((a, b) => new Date(b.fullDateTime) - new Date(a.fullDateTime)); 
     const select = document.getElementById("invoice-cobro-id");
     
-    if (!select) return; // Salir si el select no existe (ej: estamos en otra vista)
+    if (!select) return; 
 
     select.innerHTML = '<option value="">-- Seleccione un Cobro del Historial --</option>'; 
     
-    allCobros.slice(0, 100).forEach(c => { // Limitar a 100 para no sobrecargar
+    allCobros.slice(0, 100).forEach(c => { 
         const option = document.createElement('option');
         option.value = c.id;
         option.textContent = `${c.date} - ${c.clientName} (${formatCurrency(c.amount)})`;
@@ -1664,12 +1768,10 @@ function populateCobroSelectForInvoice() {
 function generateInvoiceFromSelect(viewOnly) {
     const cobroId = document.getElementById("invoice-cobro-id").value;
     if (!cobroId) {
-        showToast("Por favor, seleccione un cobro del historial.", 'error'); // MEJORA 15
+        showToast("Por favor, seleccione un cobro del historial.", 'error'); 
         return;
     }
     
-    // Al llamar sin el segundo parámetro (previousState), la función createInvoiceDocument 
-    // recalculará el estado anterior retroactivamente.
     if (viewOnly) {
         viewInvoicePDF(cobroId); 
     } else {
@@ -1677,24 +1779,19 @@ function generateInvoiceFromSelect(viewOnly) {
     }
 }
 
-// ===============================
-// FUNCIÓN PRINCIPAL DE CREACIÓN DE PDF
-// ===============================
 function createInvoiceDocument(cobroId, previousState = {}) {
-    // 1. Obtener Datos
     const cobro = DB.getInitialCobros().find(c => c.id === cobroId);
     if (!cobro) { 
-        showToast("Error: Cobro no encontrado para la factura.", 'error'); // MEJORA 15
+        showToast("Error: Cobro no encontrado para la factura.", 'error'); 
         return null; 
     }
 
     const loan = DB.get("loans").find(l => l.id === cobro.loanId);
     if (!loan) { 
-        showToast("Error: Préstamo asociado no encontrado para la factura.", 'error'); // MEJORA 15
+        showToast("Error: Préstamo asociado no encontrado para la factura.", 'error'); 
         return null; 
     }
     
-    // Intentar obtener datos completos del cliente
     const client = DB.get("clients").find(cl => cl.id === loan.clientId) || { 
         name: loan.clientName, 
         cedula: 'N/A', 
@@ -1704,27 +1801,22 @@ function createInvoiceDocument(cobroId, previousState = {}) {
     };
     
     const settings = DB.getSettings();
-    
-    // 2. Calcular Saldos
     const amountPaid = Number(cobro.amount);
     const totalPagar = Number(loan.amount) + Number(loan.totalInterest);
     const cuotaMensual = Number(loan.monthlyPayment);
     
-    // Determinar si se usa el estado de la DB (al registrar) o se recalcula retroactivamente (al ver historial)
     const isStateProvided = previousState.oldTotalPaidAmount !== undefined;
 
     let totalPaidBefore = 0;
     let paymentsMadeBefore = 0;
     
     if (!isStateProvided) {
-        // Recalcular el total pagado antes de ESTE cobro de forma retroactiva
         const allCobrosForLoan = DB.getInitialCobros()
             .filter(c => c.loanId === loan.id)
             .sort((a, b) => new Date(a.fullDateTime) - new Date(b.fullDateTime));
         
-        // Sumar todos los cobros anteriores al cobro actual
         for (const c of allCobrosForLoan) {
-            if (c.id === cobro.id) break; // Detener en el cobro que estamos facturando
+            if (c.id === cobro.id) break; 
             totalPaidBefore += Number(c.amount);
         }
         paymentsMadeBefore = Math.floor(totalPaidBefore / cuotaMensual);
@@ -1734,51 +1826,38 @@ function createInvoiceDocument(cobroId, previousState = {}) {
         paymentsMadeBefore = previousState.oldPaymentsMade;
     }
     
-    // *** CORRECCIÓN CRÍTICA: Definir el saldo restante ANTES del pago
     const remainingBalanceBefore = totalPagar - totalPaidBefore; 
     
-    // Recalcular la mora ANTES de este cobro para el desglose (basado en el estado ANTES)
     const oldRisk = calculateLoanRisk({ 
         ...loan, 
         totalPaidAmount: totalPaidBefore, 
         paymentsMade: paymentsMadeBefore 
     });
     
-    // Cuanto de lo pagado cubrió la mora que había
     const moraPagada = Math.min(amountPaid, oldRisk.totalDue);
     
-    // Abono que queda después de pagar la mora
     let abonoPrincipalInteres = amountPaid - moraPagada; 
     
-    // Lógica para determinar el abono extra (adelanto)
     let abonoProximaCuota = 0;
-    let abonoNormal = 0; // Monto que fue a cubrir la parte "normal" de la deuda (la cuota actual)
+    let abonoNormal = 0; 
 
     if (abonoPrincipalInteres > 0) {
-        // El abono normal es la porción que va a cubrir la cuota mensual
         abonoNormal = Math.min(cuotaMensual, abonoPrincipalInteres);
-        
-        // El adelanto es el excedente después de cubrir la mora y la cuota normal
         abonoProximaCuota = Math.max(0, abonoPrincipalInteres - abonoNormal);
     }
     
-    // Aseguramos que el pago a la próxima cuota no sea negativo (aunque el cálculo anterior lo evita)
     abonoProximaCuota = Math.max(0, abonoProximaCuota);
     
-    // Datos Finales
     const remainingBalanceAfter = totalPagar - (totalPaidBefore + amountPaid);
-    // Para la factura, usar el cálculo simple de pagos/cuotas
     const paymentsMadeAfter = Math.floor((totalPaidBefore + amountPaid) / cuotaMensual); 
 
 
-    // 3. Crear Documento PDF
     const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth(); // Para centrar elementos
-    let y = 15; // Posición inicial Y
+    const pageWidth = doc.internal.pageSize.getWidth(); 
+    let y = 15; 
 
-    // --- ENCABEZADO Y DATOS DE EMPRESA (Tú) ---
     doc.setFontSize(18);
-    doc.setTextColor(28, 93, 153); // Azul Oscuro
+    doc.setTextColor(28, 93, 153); 
     doc.text("RECIBO DE PAGO", pageWidth / 2, y, { align: "center" });
     y += 10;
     
@@ -1789,26 +1868,22 @@ function createInvoiceDocument(cobroId, previousState = {}) {
     doc.text("Tel: N/A - Dir: N/A", pageWidth / 2, y, { align: "center" });
     y += 10;
     
-    // --- LÍNEA SEPARADORA ---
     doc.setDrawColor(200, 200, 200);
     doc.line(10, y, pageWidth - 10, y);
     y += 5;
 
-    // --- DETALLES DEL RECIBO EN FORMATO PROFESIONAL DE 2 COLUMNAS ---
     doc.setFontSize(12);
     doc.setTextColor(0, 0, 0);
 
     const marginLeft = 10;
-    const columnWidth = (pageWidth - 20) / 2; // ancho exacto de cada columna
+    const columnWidth = (pageWidth - 20) / 2; 
     const col1X = marginLeft;
-    const col2X = marginLeft + columnWidth + 5; // separador profesional
+    const col2X = marginLeft + columnWidth + 5; 
 
-    // Helper para escribir pares de campos
     function writeRow(leftText, rightText) {
         doc.text(leftText, col1X, y);
-        // Alineación derecha para el segundo campo, usando el ancho de columna
         doc.text(rightText, col2X + columnWidth - 5, y, { align: "right" }); 
-        y += 7; // Espaciado entre filas
+        y += 7; 
     }
 
     writeRow(`Recibo No: ${cobro.id.toUpperCase().substring(0, 8)}`, 
@@ -1823,20 +1898,16 @@ function createInvoiceDocument(cobroId, previousState = {}) {
     writeRow(`Monto Principal: ${formatCurrency(loan.amount)}`, 
              `Total a Pagar (Ppal + Int): ${formatCurrency(totalPagar)}`);
 
-    y += 5; // Separación para la tabla
+    y += 5; 
 
-    // --- LÍNEA SEPARADORA ---
     doc.setDrawColor(200, 200, 200);
     doc.line(10, y, pageWidth - 10, y);
     y += 5;
 
-    // --- TABLA DE DESGLOSE DE PAGO (USANDO autoTable) ---
     let desgloseData = [
-         // Si había mora, mostrarla
         ...(moraPagada > 0 ? [["Mora Atrasada Cubierta:", formatCurrency(moraPagada)]] : []),
         ["Abono a Cuota Normal:", formatCurrency(abonoNormal)],
         ...(abonoProximaCuota > 0 ? [["Aporte Extra/Adelanto Cuota:", formatCurrency(abonoProximaCuota)]] : []),
-        // Línea divisoria en el desglose
         ["--------------------------------", "--------------------------------"],
         ["MONTO TOTAL DE ESTE COBRO:", formatCurrency(amountPaid)],
     ];
@@ -1853,15 +1924,14 @@ function createInvoiceDocument(cobroId, previousState = {}) {
             1: { halign: 'right', fontStyle: 'bold' } 
         },
         didParseCell: function(data) {
-            // Estilo especial para la fila del monto total
             if (data.row.index === desgloseData.length - 1) {
-                data.cell.styles.fillColor = [220, 240, 220]; // Verde claro
+                data.cell.styles.fillColor = [220, 240, 220]; 
             }
         },
         willDrawCell: function(data) {
             if (data.row.index === desgloseData.length - 1 && data.section === 'body') {
                 doc.setFontSize(12);
-                doc.setTextColor(46, 204, 113); // Color verde para el monto pagado
+                doc.setTextColor(46, 204, 113); 
             } else if (data.section === 'body') {
                  doc.setFontSize(10);
                  doc.setTextColor(0, 0, 0);
@@ -1871,7 +1941,6 @@ function createInvoiceDocument(cobroId, previousState = {}) {
     
     y = doc.autoTable.previous.finalY + 5;
 
-    // --- TABLA DE SALDOS FINALES (USANDO autoTable) ---
     const finalData = [
         ["Saldo Pendiente ANTES de este Pago:", formatCurrency(remainingBalanceBefore)],
         ["SALDO PENDIENTE DESPUÉS del Pago:", formatCurrency(remainingBalanceAfter)],
@@ -1890,7 +1959,6 @@ function createInvoiceDocument(cobroId, previousState = {}) {
             1: { halign: 'right', fontStyle: 'bold' } 
         },
         didParseCell: function(data) {
-            // Estilo especial para la fila del saldo final
             if (data.row.index === 1) {
                 data.cell.styles.fillColor = [200, 220, 240];
             }
@@ -1899,79 +1967,65 @@ function createInvoiceDocument(cobroId, previousState = {}) {
 
     y = doc.autoTable.previous.finalY + 10;
     
-    // --- NOTAS FINALES ---
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
     doc.text('Este documento es un comprobante de pago. Guarde para sus registros.', 10, y);
     y += 5;
     doc.text(`*El estado final del préstamo es: ${remainingBalanceAfter > 0.01 ? 'Activo' : 'Pagado'}.`, 10, y);
 
-    // --- PIE DE PÁGINA (Firma) ---
-    y = doc.internal.pageSize.height - 30; // 30mm desde el fondo
+    y = doc.internal.pageSize.height - 30; 
     doc.line(70, y, 140, y);
     doc.text('Firma/Sello de Presta Bill', pageWidth / 2, y + 5, { align: "center" });
 
     return { doc, clientName: client.name, cobroDate: cobro.date };
 }
 
-// FUNCIÓN: GENERAR Y DESCARGAR FACTURA PDF
 function generateInvoicePDF(cobroId, previousState = {}) {
     const result = createInvoiceDocument(cobroId, previousState);
     if (!result) return;
     
     const { doc, clientName, cobroDate } = result;
 
-    // 4. Guardar PDF y emitir mensaje de descarga
     const fileName = `Factura_Cobro_${clientName.replace(/\s/g, '_')}_${cobroDate.replace(/\//g, '-')}.pdf`;
     doc.save(fileName);
-    // *** CAMBIO CLAVE AQUÍ ***
     showToast(`Factura descargada: ${fileName}`, 'info'); 
 }
 
-// FUNCIÓN: GENERAR Y VISUALIZAR FACTURA PDF (NUEVA)
 function viewInvoicePDF(cobroId, previousState = {}) {
     const result = createInvoiceDocument(cobroId, previousState);
     if (!result) return;
     
     const { doc, clientName, cobroDate } = result;
 
-    // 1. Convertir el PDF a Data URI
     const pdfDataUri = doc.output('datauristring');
     
-    // 2. Cargar en el iframe
     const iframe = document.getElementById('invoice-iframe');
     const modal = document.getElementById('invoice-modal');
     const title = document.getElementById('modal-invoice-title');
     
     iframe.src = pdfDataUri;
     title.textContent = `Factura de Cobro: ${clientName} (${cobroDate})`;
-    currentCobroId = cobroId; // Guardar el ID para la descarga
+    currentCobroId = cobroId; 
     
-    // 3. Mostrar el modal
     modal.style.display = 'flex';
 }
 
-// Función para cerrar el modal
 function closeInvoiceModal() {
     const modal = document.getElementById('invoice-modal');
     const iframe = document.getElementById('invoice-iframe');
     modal.style.display = 'none';
-    iframe.src = 'about:blank'; // Limpiar el iframe
-    currentCobroId = null; // Limpiar el ID
+    iframe.src = 'about:blank'; 
+    currentCobroId = null; 
 }
 
-// Función que usa el ID global para la descarga
 function downloadInvoice() {
     if (currentCobroId) {
-        // Al descargar desde el modal, siempre regeneramos la factura por si la DB ha cambiado
-        // Llamamos directamente a generateInvoicePDF para que descargue y muestre el Toast
         generateInvoicePDF(currentCobroId); 
-        closeInvoiceModal(); // Cerramos el modal después de iniciar la descarga
+        closeInvoiceModal(); 
     } else {
-        showToast("No hay una factura seleccionada para descargar.", 'error'); // MEJORA 15
+        showToast("No hay una factura seleccionada para descargar.", 'error'); 
     }
 }
-// ===============================================
 
 
 function refreshPendingPayments() {
@@ -1991,10 +2045,8 @@ function refreshPendingPayments() {
         const moraClass = risk.monthsBehind > 0 ? 'mora-alert-text' : '';
         const moraText = risk.monthsBehind > 0 ? `${risk.monthsBehind} Meses` : 'Al día';
         const nextDueText = risk.nextDueDate ? risk.nextDueDate.split('-').reverse().join('/') : 'N/A';
-        // Si hay mora, mostrar el total de la mora. Si no, mostrar la cuota normal.
         const dueAmountText = risk.monthsBehind > 0 ? formatCurrency(risk.totalDue) : formatCurrency(l.monthlyPayment);
 
-        // MEJORA 10: Doble clic para seleccionar y sugerir cobro
         return `
             <tr class="${index % 2 === 0 ? 'neutral-row-even' : 'neutral-row-odd'}"
                 ondblclick="
@@ -2047,9 +2099,7 @@ function refreshPendingPayments() {
     `;
 }
 
-// ===============================================
 // VISTA: HISTORIAL DE COBROS
-// ===============================================
 function renderCobrosHistory() {
     main.innerHTML = `
         <h2>Historial de Transacciones (Cobros) 📜</h2>
@@ -2059,7 +2109,7 @@ function renderCobrosHistory() {
 }
 
 function refreshCobrosHistory() {
-    const allCobros = DB.getInitialCobros().sort((a, b) => new Date(b.fullDateTime) - new Date(a.fullDateTime)); // Ordenar por fecha, el más reciente primero
+    const allCobros = DB.getInitialCobros().sort((a, b) => new Date(b.fullDateTime) - new Date(a.fullDateTime)); 
     const box = document.getElementById("cobros-history-list");
 
     if (allCobros.length === 0) {
@@ -2099,9 +2149,7 @@ function refreshCobrosHistory() {
     `;
 }
 
-// MEJORA 12: FUNCIÓN DE ELIMINACIÓN DE COBRO (CASCADA)
 function deleteCobro(cobroId) {
-    // Aplicar bloqueo de suscripción
     if (!trialActivo() && !suscripcionActiva()) {
         showToast("Función Premium: Tu período de prueba ha expirado. Suscríbete para editar o eliminar datos.", 'error');
         abrirModal();
@@ -2118,7 +2166,6 @@ function deleteCobro(cobroId) {
     allCobros.splice(cobroIndex, 1);
     DB.set("cobros", allCobros);
     
-    // 1. Recalcular el estado del Préstamo afectado
     let allLoans = DB.get("loans");
     const loanIndex = allLoans.findIndex(l => l.id === cobroToDelete.loanId);
     
@@ -2127,7 +2174,6 @@ function deleteCobro(cobroId) {
         const totalPagar = Number(loan.amount) + Number(loan.totalInterest);
         const cuotaMensual = Number(loan.monthlyPayment);
         
-        // Recalcular el total pagado sumando todos los cobros restantes de ese préstamo
         const newTotalPaidAmount = allCobros
             .filter(c => c.loanId === loan.id)
             .reduce((sum, current) => sum + Number(current.amount), 0);
@@ -2135,7 +2181,6 @@ function deleteCobro(cobroId) {
         loan.totalPaidAmount = newTotalPaidAmount;
         loan.paymentsMade = Math.floor(newTotalPaidAmount / cuotaMensual);
 
-        // Revisar el nuevo estado
         const newRemaining = totalPagar - loan.totalPaidAmount;
         if (newRemaining > 0.01) { 
             loan.status = 'Activo';
@@ -2151,19 +2196,14 @@ function deleteCobro(cobroId) {
 
     refreshCobrosHistory(); 
     
-    // Si la vista de Cobros está abierta, refrescarla también
     if (document.getElementById('pending-payments-list')) {
         refreshPendingPayments();
     }
     
-    showToast("Cobro eliminado y saldo de préstamo ajustado correctamente.", 'warning'); // MEJORA 15
+    showToast("Cobro eliminado y saldo de préstamo ajustado correctamente.", 'warning'); 
 }
-// ===============================================
 
-
-// ===============================================
 // VISTA: REPORTES (SIN BLOQUEO PREMIUM)
-// ===============================================
 function renderReports() {
     
     const summary = calculateLoanPortfolioSummary();
@@ -2201,7 +2241,6 @@ function renderClientRanking() {
     const loans = DB.get("loans");
     const clientRanking = {};
 
-    // 1. Agrupar por cliente y sumar montos originales prestados
     loans.forEach(loan => {
         if (!clientRanking[loan.clientId]) {
             clientRanking[loan.clientId] = {
@@ -2216,7 +2255,6 @@ function renderClientRanking() {
         }
     });
 
-    // 2. Convertir a array y ordenar por monto total
     let rankingArray = Object.values(clientRanking).sort((a, b) => b.totalAmount - a.totalAmount);
 
     if (rankingArray.length === 0) {
@@ -2257,7 +2295,7 @@ function renderMoraLoansDetail() {
     const loansInMora = allLoans
         .map(l => ({ ...l, risk: calculateLoanRisk(l) }))
         .filter(l => l.risk.monthsBehind > 0)
-        .sort((a, b) => b.risk.monthsBehind - a.risk.monthsBehind); // El que más debe primero
+        .sort((a, b) => b.risk.monthsBehind - a.risk.monthsBehind); 
 
     const box = document.getElementById("mora-loans-detail");
 
@@ -2299,9 +2337,7 @@ function renderMoraLoansDetail() {
     `;
 }
 
-// ===============================================
 // VISTA: CONFIGURACIONES
-// ===============================================
 function renderSettings() {
     const settings = DB.getSettings();
     main.innerHTML = `
@@ -2320,7 +2356,6 @@ function renderSettings() {
 }
 
 function saveSettings() {
-    // Aplicar bloqueo de suscripción
     if (!trialActivo() && !suscripcionActiva()) {
         showToast("Función Premium: Tu período de prueba ha expirado. Suscríbete para guardar configuraciones.", 'error');
         abrirModal();
@@ -2331,7 +2366,7 @@ function saveSettings() {
     const baseInterestRate = Number(document.getElementById("setting-interest-rate").value);
     
     if (!currencySymbol || baseInterestRate < 0) {
-        showToast("Por favor, ingrese un símbolo de moneda y una tasa de interés base válida (mayor o igual a cero).", 'error'); // MEJORA 15
+        showToast("Por favor, ingrese un símbolo de moneda y una tasa de interés base válida (mayor o igual a cero).", 'error'); 
         return;
     }
 
@@ -2341,15 +2376,12 @@ function saveSettings() {
     };
     
     DB.set("settings", newSettings);
-    showToast("Configuraciones guardadas. Es posible que deba recargar las vistas para ver los cambios de moneda.", 'success'); // MEJORA 15
+    showToast("Configuraciones guardadas. Es posible que deba recargar las vistas para ver los cambios de moneda.", 'success'); 
     
-    // Recargar la vista actual para reflejar los cambios de inmediato
     renderSettings(); 
 }
 
-// ===============================================
 // VISTA: MANTENIMIENTO
-// ===============================================
 function renderMaintenance() {
     main.innerHTML = `
         <h2>Mantenimiento y Respaldo 💾</h2>
@@ -2381,7 +2413,6 @@ function renderMaintenance() {
 }
 
 function resetData() {
-    // Aplicar bloqueo de suscripción
     if (!trialActivo() && !suscripcionActiva()) {
         showToast("Función Premium: Tu período de prueba ha expirado. Suscríbete para realizar el mantenimiento.", 'error');
         abrirModal();
@@ -2393,7 +2424,7 @@ function resetData() {
         localStorage.removeItem("loans");
         localStorage.removeItem("cobros");
         localStorage.removeItem("settings");
-        showToast("Todos los datos han sido eliminados. Se reiniciará la aplicación al Dashboard.", 'warning'); // MEJORA 15
+        showToast("Todos los datos han sido eliminados. Se reiniciará la aplicación al Dashboard.", 'warning'); 
         renderDashboard(); 
     }
 }
@@ -2415,11 +2446,10 @@ function exportData() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    showToast("Datos exportados correctamente.", 'success'); // MEJORA 15
+    showToast("Datos exportados correctamente.", 'success'); 
 }
 
 function importData() {
-    // Aplicar bloqueo de suscripción
     if (!trialActivo() && !suscripcionActiva()) {
         showToast("Función Premium: Tu período de prueba ha expirado. Suscríbete para importar datos.", 'error');
         abrirModal();
@@ -2430,7 +2460,7 @@ function importData() {
     const file = fileInput.files[0];
     
     if (!file) {
-        showToast("Por favor, seleccione un archivo JSON para importar.", 'error'); // MEJORA 15
+        showToast("Por favor, seleccione un archivo JSON para importar.", 'error'); 
         return;
     }
     
@@ -2448,29 +2478,24 @@ function importData() {
                 DB.set("loans", importedData.loans);
                 DB.set("cobros", importedData.cobros);
                 
-                // Opcional: importar configuraciones
                 if (importedData.settings) {
                     DB.set("settings", importedData.settings);
                 } else {
-                     // Si el archivo viejo no tiene settings, asegurar que los default sigan
                      DB.set("settings", DEFAULT_SETTINGS); 
                 }
                 
-                showToast("Datos importados y restaurados correctamente. Se reiniciará la aplicación al Dashboard.", 'success'); // MEJORA 15
+                showToast("Datos importados y restaurados correctamente. Se reiniciará la aplicación al Dashboard.", 'success'); 
                 renderDashboard();
             } else {
-                showToast("Error: El archivo JSON no tiene la estructura de respaldo esperada (clients, loans, cobros).", 'error'); // MEJORA 15
+                showToast("Error: El archivo JSON no tiene la estructura de respaldo esperada (clients, loans, cobros).", 'error'); 
             }
         } catch (error) {
-            showToast("Error al procesar el archivo: " + error.message, 'error'); // MEJORA 15
+            showToast("Error al procesar el archivo: " + error.message, 'error'); 
         }
     };
     reader.readAsText(file);
 }
 
-// ===============================================
-// FUNCIÓN AÑADIDA PARA RESETEAR SUSCRIPCIÓN (SOLUCIÓN)
-// ===============================================
 function resetSubscriptionState() {
     if (!confirm("¿Estás seguro de que quieres forzar la inactividad de la suscripción de PayPal? Esto hará que el botón de pago vuelva a aparecer y reiniciará el Dashboard.")) {
         return;
@@ -2478,29 +2503,17 @@ function resetSubscriptionState() {
 
     localStorage.setItem("paypalSubscription", "inactive");
     
-    // Recargar el botón de PayPal inmediatamente si el modal está abierto, o avisar
     if (document.getElementById("modal-overlay").style.display === "flex") {
-        cargarBotonPayPal(); // Asegura que el botón se renderice si el modal estaba abierto
+        cargarBotonPayPal(); 
     }
 
     showToast("Estado de Suscripción reseteado a INACTIVO. Intenta abrir el menú y luego el botón 'Suscripción'.", 'warning');
-    // Forzar recarga de la vista para asegurar que el mensaje de trial expire se vaya.
     renderDashboard(); 
 }
-// ===============================================
 
-
-// ===============================================
-// INICIALIZACIÓN - AJUSTADA
-// ===============================================
+// INICIALIZACIÓN
 document.addEventListener("DOMContentLoaded", function() {
-    // ELIMINADA: La llamada inicial a cargarBotonPayPal() ya no es necesaria, 
-    // se llama al abrirModal() si la suscripción está inactiva.
-    
-    // Verificar si el modal debe abrirse al cargar la página si el trial ha expirado
     verificarAcceso(); 
-    
-    // Renderizar el dashboard
     renderDashboard();
 });
 </script>
