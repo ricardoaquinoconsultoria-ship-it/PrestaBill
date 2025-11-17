@@ -736,6 +736,85 @@ function closeSidebar() {
 }
 
 // ===============================================
+// LÓGICA DE SWIPE TÁCTIL PARA EL MENÚ (AÑADIDO)
+// ===============================================
+
+let touchstartX = 0;
+let touchendX = 0;
+const SWIPE_THRESHOLD = 50; // Mínimo de píxeles para considerar un deslizamiento
+
+function checkDirection() {
+    const isSidebarOpen = sidebar.classList.contains("open");
+    const swipeDistance = touchendX - touchstartX;
+
+    if (Math.abs(swipeDistance) < SWIPE_THRESHOLD) return; // No es un deslizamiento significativo
+
+    // Deslizar a la derecha (Abrir menú)
+    if (swipeDistance > 0 && !isSidebarOpen) {
+        // Solo permitir si el toque inicial estuvo cerca del borde izquierdo
+        if (touchstartX < 50) { 
+            menuToggle.click(); // Simular clic en el botón para abrir
+        }
+    }
+
+    // Deslizar a la izquierda (Cerrar menú)
+    if (swipeDistance < 0 && isSidebarOpen) {
+        menuToggle.click(); // Simular clic en el botón para cerrar
+    }
+}
+
+// 1. Escuchar el inicio del toque en el contenido principal
+main.addEventListener('touchstart', e => {
+    // Solo si es un solo dedo
+    if (e.touches.length === 1) { 
+        touchstartX = e.touches[0].clientX;
+        touchendX = 0; // Resetear para evitar cierres accidentales
+    }
+}, false);
+
+// 2. Escuchar el movimiento del toque
+main.addEventListener('touchmove', e => {
+    // Prevenir scroll vertical al deslizar horizontalmente cerca del borde (opcional, pero mejora la experiencia)
+    const isSidebarOpen = sidebar.classList.contains("open");
+    if (isSidebarOpen || touchstartX < 50) {
+        e.preventDefault(); 
+    }
+}, { passive: false }); // Usar passive: false para permitir preventDefault
+
+// 3. Escuchar el final del toque y verificar la dirección
+main.addEventListener('touchend', e => {
+    // Obtener la posición final del toque
+    if (e.changedTouches.length === 1) {
+        touchendX = e.changedTouches[0].clientX;
+        checkDirection();
+    }
+}, false);
+
+// 4. Implementar lo mismo en la barra lateral para permitir cerrar desde ella
+sidebar.addEventListener('touchstart', e => {
+    if (e.touches.length === 1) { 
+        touchstartX = e.touches[0].clientX;
+        touchendX = 0; 
+    }
+}, false);
+
+// 5. Verificar el cierre al soltar el dedo en la barra lateral (solo al deslizar a la izquierda)
+sidebar.addEventListener('touchend', e => {
+    if (e.changedTouches.length === 1) {
+        touchendX = e.changedTouches[0].clientX;
+        const swipeDistance = touchendX - touchstartX;
+        
+        // Si es un deslizamiento significativo a la izquierda y el menú está abierto, cerrarlo
+        if (swipeDistance < -SWIPE_THRESHOLD && sidebar.classList.contains("open")) {
+            menuToggle.click(); 
+        }
+    }
+}, false);
+
+// ===============================================
+
+
+// ===============================================
 // FUNCIÓN DE CÁLCULO DE RIESGO DE MORA
 // ===============================================
 function calculateLoanRisk(loan) {
