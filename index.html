@@ -2177,6 +2177,9 @@ function renderCobrosHistory() {
     refreshCobrosHistory();
 }
 
+/**
+ * Función para actualizar la lista de historial de cobros con mejoras responsive.
+ */
 function refreshCobrosHistory() {
     const allCobros = DB.getInitialCobros().sort((a, b) => new Date(b.fullDateTime) - new Date(a.fullDateTime)); 
     const box = document.getElementById("cobros-history-list");
@@ -2189,31 +2192,33 @@ function refreshCobrosHistory() {
     const tableRows = allCobros.map((c, index) => `
         <tr class="${index % 2 === 0 ? 'neutral-row-even' : 'neutral-row-odd'}">
             <td>${c.date}</td>
-            <td>${c.clientName}</td>
+            <td class="client-loan-cell">${c.clientName}</td>
             <td>${formatCurrency(c.amount)}</td>
-            <td>
-                <button class="action-btn" style="padding: 5px 10px; width:auto; font-size:14px; background:#8e44ad; margin-right: 5px;" onclick="viewInvoicePDF('${c.id}')">👁️ Ver Factura</button>
-                <button class="action-btn" style="padding: 5px 10px; width:auto; font-size:14px; background:#2ecc71; margin-right: 5px;" onclick="generateInvoicePDF('${c.id}')">⬇️ Descargar</button>
-                <button class="action-btn" style="padding: 5px 10px; width:auto; font-size:14px; background:#e74c3c;" onclick="deleteCobro('${c.id}')">🗑️ Eliminar</button>
+            <td style="display: flex; flex-wrap: wrap; gap: 5px; min-width: 200px;">
+                <button class="action-btn" style="padding: 5px 10px; width:auto; font-size:12px; background:#8e44ad;" onclick="viewInvoicePDF('${c.id}')">👁️ Ver Factura</button>
+                <button class="action-btn" style="padding: 5px 10px; width:auto; font-size:12px; background:#2ecc71;" onclick="generateInvoicePDF('${c.id}')">⬇️ Descargar</button>
+                <button class="action-btn" style="padding: 5px 10px; width:auto; font-size:12px; background:#e74c3c;" onclick="deleteCobro('${c.id}')">🗑️ Eliminar</button>
             </td>
         </tr>
     `).join('');
 
     box.innerHTML = `
         <div class="card">
-            <table>
-                <thead>
-                    <tr class="neutral-header">
-                        <th>Fecha</th>
-                        <th>Cliente</th>
-                        <th>Monto Cobrado</th>
-                        <th>Acción</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${tableRows}
-                </tbody>
-            </table>
+            <div class="table-responsive-container"> 
+                <table>
+                    <thead>
+                        <tr class="neutral-header">
+                            <th>Fecha</th>
+                            <th>Cliente</th>
+                            <th>Monto Cobrado</th>
+                            <th style="min-width: 250px;">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableRows}
+                    </tbody>
+                </table>
+            </div>
         </div>
     `;
 }
