@@ -2466,11 +2466,6 @@ function renderMaintenance() {
             <button class="action-btn" style="background:#c0392b;" onclick="resetData()">🗑️ Eliminar Todos los Datos</button>
         </div>
         
-        <div class="card" style="background: #fdf5e6; border: 1px solid #f39c12;">
-            <h3 style="color:#f39c12;">Control de Suscripción (Debugging)</h3>
-            <p>Si el botón de PayPal no aparece, haz clic aquí para forzar la inactividad de la suscripción (solo para pruebas/debugging).</p>
-            <button class="action-btn" style="background:#f39c12;" onclick="resetSubscriptionState()">🔄 Resetear Estado de Suscripción</button>
-        </div>
         <div class="card">
             <h3>Exportar Respaldo</h3>
             <p>Guarde un respaldo de todos los datos como un archivo JSON. Puede importarlo más tarde o usarlo como copia de seguridad.</p>
@@ -2570,20 +2565,8 @@ function importData() {
     reader.readAsText(file);
 }
 
-function resetSubscriptionState() {
-    if (!confirm("¿Estás seguro de que quieres forzar la inactividad de la suscripción de PayPal? Esto hará que el botón de pago vuelva a aparecer y reiniciará el Dashboard.")) {
-        return;
-    }
+// Función resetSubscriptionState ELIMINADA.
 
-    localStorage.setItem("paypalSubscription", "inactive");
-    
-    if (document.getElementById("modal-overlay").style.display === "flex") {
-        cargarBotonPayPal(); 
-    }
-
-    showToast("Estado de Suscripción reseteado a INACTIVO. Intenta abrir el menú y luego el botón 'Suscripción'.", 'warning');
-    renderDashboard(); 
-}
 // ===============================================
 // FIN: FUNCIONES DE CLIENTES, PRÉSTAMOS, COBROS, etc.
 // ===============================================
