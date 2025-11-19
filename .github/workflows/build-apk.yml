@@ -14,7 +14,9 @@ jobs:
         cordova create app com.prestabill.app "PrestaBill"
         cd app
         cordova platform add android
-        cp -r ../* www/
+        # Copiar SOLO los archivos de tu web, excluyendo .github y la carpeta app
+        find .. -maxdepth 1 -type f -exec cp {} www/ \;
+        find .. -maxdepth 1 -type d -name "css" -o -name "js" -o -name "assets" | xargs -I {} cp -r {} www/
         cordova build android
     - name: Upload APK
       uses: actions/upload-artifact@v4
